@@ -1,6 +1,9 @@
 /target
-.env
-.env.*
+
+.env.local
+.env.dev
+.env.prod
+
 *.log
 .idea/
 

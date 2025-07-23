@@ -1790,7 +1790,6 @@ dependencies = [
  "sqlx",
  "strum",
  "strum_macros",
- "thiserror",
  "time",
  "tokio",
  "toml",
