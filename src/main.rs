@@ -11,7 +11,6 @@ use crate::shared::{
     setting::models::{app_config::AppConfig, app_env::AppEnv, app_setting::AppSettings, app_state::AppState},
 };
 
-use tower_http::trace::TraceLayer;
 mod analytics;
 
 mod test;
