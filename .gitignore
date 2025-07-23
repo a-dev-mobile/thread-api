@@ -1,0 +1,12 @@
+/target
+.env
+.env.*
+*.log
+.idea/
+
+rust_doc
+.vscode/*
+
+.vscode/tasks.json
+makefile
+.sqlx/**.json

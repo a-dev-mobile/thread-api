@@ -1,0 +1,11 @@
+
+log_level = "info,sqlx=info"
+log_format = "json"
+app_env = "prod"
+
+[server]
+address = "0.0.0.0"
+port = 5000
+
+[database]
+url = ""
