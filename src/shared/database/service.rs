@@ -1,5 +1,5 @@
 use std::sync::Arc;
-use tracing::{error, info};
+use crate::{log_error, log_info};
 
 use crate::shared::{database::connection::PostgresConnection, setting::models::app_setting::AppSettings};
 
@@ -17,20 +17,20 @@ pub struct PostgresService {
 
 impl PostgresService {
     pub async fn new(settings: &Arc<AppSettings>) -> Result<Self, Box<dyn std::error::Error>> {
-        info!("Initializing PostgreSQL service components");
+        log_info!("Initializing PostgreSQL service components");
 
         // Initialize PostgreSQL connection
-        info!("Creating PostgreSQL connection");
+        log_info!("Creating PostgreSQL connection");
         let postgres_connection = match PostgresConnection::new(settings.clone()).await {
             Ok(conn) => Arc::new(conn),
             Err(e) => {
-                error!("Failed to establish PostgreSQL connection: {}", e);
+                log_error!("Failed to establish PostgreSQL connection: {}", e);
                 return Err(Box::new(e));
             }
         };
 
         // Initialize repositories
-        info!("Initializing repositories");
+        log_info!("Initializing repositories");
         // let health_check_repository = Arc::new(StructHealthCheckRepository::new(
         //     postgres_connection.clone(),
         // )) as Arc<dyn TraitHealthCheckRepository + Send + Sync>;
@@ -45,7 +45,7 @@ impl PostgresService {
         //    postgres_connection.clone(),
         // )) as Arc<dyn UserRepository + Send + Sync>;
 
-        info!("PostgreSQL service initialized successfully");
+        log_info!("PostgreSQL service initialized successfully");
         Ok(Self {
             connection: postgres_connection,
             // repository_health_check: health_check_repository,

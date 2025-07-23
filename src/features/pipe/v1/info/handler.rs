@@ -16,7 +16,7 @@ use axum::{
 use sqlx::query_as;
 use sqlx::PgPool;
 
-use tracing::error;
+use crate::log_error;
 
 use axum::extract::Query;
 
@@ -55,7 +55,7 @@ pub async fn handle(
     let db_records = match db_records {
         Ok(records) => records,
         Err(e) => {
-            error!("Ошибка при выполнении запроса к базе данных: {}", e);
+            log_error!("Ошибка при выполнении запроса к базе данных: {}", e);
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(serde_json::json!({ "error": "Внутренняя ошибка сервера" })),

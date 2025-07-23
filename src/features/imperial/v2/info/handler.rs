@@ -7,7 +7,7 @@ use axum::{
 };
 
 use sqlx::PgPool;
-use tracing::error;
+use crate::log_error;
 
 use crate::{
     analytics::db::handle_thread_analytics,
@@ -44,7 +44,7 @@ pub async fn handle(
     {
         Ok(record) => record,
         Err(e) => {
-            error!("Database query error: {}", e);
+            log_error!("Database query error: {}", e);
             return (StatusCode::INTERNAL_SERVER_ERROR, Json(serde_json::json!({
                 "error": format!("Thread with diameter: {}, TPI: {}, class: {} not found",
                     request.diameter, request.tpi, request.series)

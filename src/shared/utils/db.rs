@@ -1,7 +1,7 @@
 use axum::{http::StatusCode, Json};
 use serde_json::Value;
 use sqlx::{postgres::PgArguments, Column, PgPool, Row};
-use tracing::{error, info};
+use crate::{log_error, log_info};
 
 /// Тип ответа для функции `execute_query`.
 pub enum ResponseType {
@@ -34,7 +34,7 @@ where
         sqlx::query::Query<'_, sqlx::Postgres, PgArguments>,
     ) -> sqlx::query::Query<'_, sqlx::Postgres, PgArguments>,
 {
-    info!("Executing query: {}", query);
+    log_info!("Executing query: {}", query);
     // Привязка параметров к запросу
     let sql_query = binds(sqlx::query(query));
 
@@ -42,7 +42,7 @@ where
     let rows = match sql_query.fetch_all(pool).await {
         Ok(r) => r,
         Err(e) => {
-            error!("Error executing query: {}", e);
+            log_error!("Error executing query: {}", e);
             return Err((
                 StatusCode::INTERNAL_SERVER_ERROR,
                 format!("Ошибка базы данных: {}", e),
@@ -50,7 +50,7 @@ where
         }
     };
 
-    info!("Query executed successfully, received {} rows", rows.len());
+    log_info!("Query executed successfully, received {} rows", rows.len());
 
     // Преобразование строк в JSON с учетом precision
     let results: Vec<Value> = rows.iter().map(|row| row_to_json(row, precision)).collect();
@@ -117,7 +117,7 @@ fn row_to_json(row: &sqlx::postgres::PgRow, precision: Option<usize>) -> Value {
                 column_name,
                 column.type_info()
             );
-            error!("{}", error_message);
+            log_error!("{}", error_message);
             None
         };
 

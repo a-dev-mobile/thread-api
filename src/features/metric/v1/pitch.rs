@@ -4,7 +4,7 @@ use axum::{
 };
 use serde::Deserialize;
 use sqlx::PgPool;
-use tracing::info;
+use crate::log_info;
 
 use crate::shared::utils::db::{execute_query, ResponseType};
 
@@ -18,7 +18,7 @@ pub async fn pitch(
     Extension(pool): Extension<PgPool>,
     Query(params): Query<PitchParams>,
 ) -> impl IntoResponse {
-    info!("Handling pitch request with parameters: {:?}", params);
+    log_info!("Handling pitch request with parameters: {:?}", params);
 
     let diameter = params.diameter;
     // Clone the language to own the String

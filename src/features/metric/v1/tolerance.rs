@@ -4,7 +4,7 @@ use axum::{
 };
 use serde::Deserialize;
 use sqlx::PgPool;
-use tracing::info;
+use crate::log_info;
 
 use crate::shared::utils::db::{execute_query, ResponseType};
 
@@ -19,7 +19,7 @@ pub async fn tolerance(
     Extension(pool): Extension<PgPool>,
     Query(params): Query<ToleranceParams>,
 ) -> impl IntoResponse {
-    info!("Handling tolerance request with parameters: {:?}", params);
+    log_info!("Handling tolerance request with parameters: {:?}", params);
 
     let id = params.id;
     let type_ = params.type_.clone().unwrap_or_else(|| "f".to_string());

@@ -5,7 +5,7 @@ use axum::response::IntoResponse;
 use axum::Json;
 use axum::{extract::Query, Extension};
 use sqlx::PgPool;
-use tracing::error;
+use crate::log_error;
 
 use crate::services::svg::enums::{FontFamily, FontWeight, TextAnchor};
 use crate::shared::enums::{Language, ThreadStandard, ThreadType, Unit};
@@ -42,7 +42,7 @@ pub async fn handle(
     {
         Ok(data) => data,
         Err(e) => {
-            error!("Database query error: {}", e);
+            log_error!("Database query error: {}", e);
             let error_message = if e.to_string().contains("no rows") {
                 "No thread specifications found for the given diameter and TPI"
             } else {

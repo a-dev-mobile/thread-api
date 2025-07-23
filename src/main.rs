@@ -3,11 +3,11 @@ mod shared;
 use axum::{http::Request, routing::get, Router};
 use std::{net::SocketAddr, sync::Arc};
 use tokio::net::TcpListener;
-use tracing::{debug, error, info};
+use crate::shared::logging::{init::init_logging, structs::LogConfig, enums::LogLevel};
 
 use crate::shared::{
     database::{migrations::run_migrations, service::PostgresService},
-    logger, middleware,
+    logging, middleware,
     setting::models::{app_config::AppConfig, app_env::AppEnv, app_setting::AppSettings, app_state::AppState},
 };
 
@@ -44,29 +44,28 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 async fn init_app() -> AppSettings {
     let environment = AppEnv::new();
     let config = AppConfig::new(&environment.env);
-    info!("Инициализация приложения с конфигурацией: {:?}", config);
     let app_settings = AppSettings {
         config,
         env: environment,
     };
 
-    // Setup logging with configured level and format
-    logger::init_logger(
-        &app_settings.config.logging.level,
-        &app_settings.config.logging.format,
-        app_settings.env.is_prod(),
-    )
-    .expect("Failed to initialize logger");
+    // Setup logging with configured level
+    let log_level = LogLevel::from(app_settings.config.logging.level.as_str());
+    let log_config = LogConfig { level: log_level };
+    init_logging(log_config)
+        .expect("Failed to initialize logger");
+
+    log_info!("Инициализация приложения с конфигурацией: {:?}", app_settings.config);
 
     // Log application startup information
-    info!("Starting application...");
-    info!("Current environment: {}", app_settings.env.env);
+    log_info!("Starting application...");
+    log_info!("Current environment: {}", app_settings.env.env);
 
     if app_settings.env.is_development() {
-        info!("Running in local development mode");
-        debug!("Configuration details: {:#?}", app_settings);
+        log_info!("Running in local or dev mode");
+        log_debug!("Configuration details: {:#?}", app_settings);
     } else {
-        info!("Running in production mode");
+        log_info!("Running in production mode");
     }
 
     app_settings
@@ -180,30 +179,30 @@ fn create_application_router(app_state: Arc<AppState>) -> Router {
 
 /// Starts the HTTP server on the specified address
 async fn start_http_server(app: Router, addr: SocketAddr) {
-    info!("Starting HTTP server on {}", addr);
+    log_info!("Starting HTTP server on {}", addr);
 
     let listener = match TcpListener::bind(addr).await {
         Ok(listener) => listener,
         Err(err) => {
-            error!("Failed to bind to address {}: {}", addr, err);
+            log_error!("Failed to bind to address {}: {}", addr, err);
             panic!("Cannot start server: {}", err);
         }
     };
 
-    info!("Server started successfully, now accepting connections");
+    log_info!("Server started successfully, now accepting connections");
 
     if let Err(err) = axum::serve(listener, app).await {
-        error!("Server error: {}", err);
+        log_error!("Server error: {}", err);
         panic!("Server failed: {}", err);
     }
 }
 
 async fn initialize_database(settings: Arc<AppSettings>) -> Result<PostgresService, Box<dyn std::error::Error>> {
-    info!("Initializing database connections...");
+    log_info!("Initializing database connections...");
 
     let postgres_service = PostgresService::new(&settings).await?;
 
-    info!("Running database migrations...");
+    log_info!("Running database migrations...");
     run_migrations(postgres_service.connection.pool()).await?;
 
     Ok(postgres_service)

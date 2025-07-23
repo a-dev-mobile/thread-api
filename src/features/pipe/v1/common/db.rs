@@ -1,7 +1,7 @@
 // src/routes/v1/pipe/core/db.rs
 
 use sqlx::{PgPool, Row};
-use tracing::{debug, error};
+use crate::{log_debug, log_error};
 
 use crate::{
    shared::enums::ThreadType,
@@ -37,7 +37,7 @@ impl ThreadDataService {
         let basic_dim_query =
             "SELECT * FROM pipe.basic_dimensions WHERE p = $1::double precision";
 
-        debug!(
+        log_debug!(
             "Executing queries with params: diameter={}, pitch={}",
             diameter, pitch
         );
@@ -157,7 +157,7 @@ impl ThreadDataService {
             Err(_) => match row.try_get::<i32, _>(name) {
                 Ok(v) => Ok(v as f64),
                 Err(e) => {
-                    error!("Error getting value for {}: {}", name, e);
+                    log_error!("Error getting value for {}: {}", name, e);
                     Err(e)
                 }
             },
@@ -168,7 +168,7 @@ impl ThreadDataService {
         match row.try_get::<i32, _>(name) {
             Ok(v) => Ok((v as f64) / 1000.0),
             Err(e) => {
-                error!("Error getting tolerance for {}: {}", name, e);
+                log_error!("Error getting tolerance for {}: {}", name, e);
                 Err(e)
             }
         }

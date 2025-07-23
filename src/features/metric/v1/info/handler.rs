@@ -4,7 +4,7 @@ use axum::{
 };
 use serde::Deserialize;
 use sqlx::PgPool;
-use tracing::info;
+use crate::log_info;
 
 use crate::shared::utils::db::{execute_query, ResponseType};
 
@@ -26,7 +26,7 @@ pub async fn info(
     Extension(pool): Extension<PgPool>,
     Query(params): Query<InfoParams>,
 ) -> impl IntoResponse {
-    info!("Processing info request with parameters: {:?}", params);
+    log_info!("Processing info request with parameters: {:?}", params);
 
     let query = "SELECT * FROM metric.get_info($1, $2, $3, $4, $5, $6)";
 

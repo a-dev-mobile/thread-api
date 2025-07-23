@@ -3,10 +3,10 @@ use sqlx::{
     Executor, PgPool,
 };
 use std::path::Path;
-use tracing::{error, info};
+use crate::{log_error, log_info};
 
 pub async fn run_migrations(pool: &PgPool) -> Result<(), MigrateError> {
-    info!("Running database migrations...");
+    log_info!("Running database migrations...");
 
     // Читаем миграции во время выполнения
     let migrations_path = Path::new("./migrations");
@@ -15,14 +15,14 @@ pub async fn run_migrations(pool: &PgPool) -> Result<(), MigrateError> {
         Ok(migrator) => {
             // Показываем какие миграции найдены
             let migrations = migrator.iter().collect::<Vec<_>>();
-            info!("Found {} migration(s):", migrations.len());
+            log_info!("Found {} migration(s):", migrations.len());
             for migration in &migrations {
-                info!("  - {} : {}", migration.version, migration.description);
+                log_info!("  - {} : {}", migration.version, migration.description);
             }
 
             match migrator.run(pool).await {
                 Ok(_) => {
-                    info!("✅ Database migrations completed successfully");
+                    log_info!("✅ Database migrations completed successfully");
 
                     // Проверяем результат
                     let applied_migrations: Vec<(i64, String)> = sqlx::query_as(
@@ -32,21 +32,21 @@ pub async fn run_migrations(pool: &PgPool) -> Result<(), MigrateError> {
                     .await
                     .map_err(MigrateError::Execute)?;
 
-                    info!("Applied migrations:");
+                    log_info!("Applied migrations:");
                     for (version, description) in applied_migrations {
-                        info!("  ✓ {} : {}", version, description);
+                        log_info!("  ✓ {} : {}", version, description);
                     }
 
                     Ok(())
                 }
                 Err(e) => {
-                    error!("Failed to run migrations: {}", e);
+                    log_error!("Failed to run migrations: {}", e);
                     Err(e)
                 }
             }
         }
         Err(e) => {
-            error!(
+            log_error!(
                 "Failed to create migrator from path {:?}: {}",
                 migrations_path, e
             );
@@ -57,7 +57,7 @@ pub async fn run_migrations(pool: &PgPool) -> Result<(), MigrateError> {
 
 // Функция для быстрой проверки новых миграций без перезапуска
 pub async fn check_pending_migrations(pool: &PgPool) -> Result<(), MigrateError> {
-    info!("Checking for pending migrations...");
+    log_info!("Checking for pending migrations...");
 
     let migrations_path = Path::new("./migrations");
     let migrator = Migrator::new(migrations_path).await?;
@@ -81,11 +81,11 @@ pub async fn check_pending_migrations(pool: &PgPool) -> Result<(), MigrateError>
         .collect();
 
     if pending.is_empty() {
-        info!("✅ No pending migrations");
+        log_info!("✅ No pending migrations");
     } else {
-        info!("📋 Found {} pending migration(s):", pending.len());
+        log_info!("📋 Found {} pending migration(s):", pending.len());
         for migration in pending {
-            info!("  - {} : {}", migration.version, migration.description);
+            log_info!("  - {} : {}", migration.version, migration.description);
         }
     }
 

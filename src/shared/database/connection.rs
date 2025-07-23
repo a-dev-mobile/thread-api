@@ -1,6 +1,6 @@
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
 use std::sync::Arc;
-use tracing::{debug, error, info};
+use crate::{log_debug, log_error, log_info};
 
 use crate::shared::setting::models::app_setting::AppSettings;
 
@@ -13,7 +13,7 @@ pub struct PostgresConnection {
 
 impl PostgresConnection {
     pub async fn new(settings: Arc<AppSettings>) -> Result<Self, sqlx::Error> {
-        info!("Initializing PostgreSQL connection...");
+        log_info!("Initializing PostgreSQL connection...");
         let env = &settings.env;
         let config_postgres = &settings.config.postgres;
 
@@ -33,11 +33,11 @@ impl PostgresConnection {
             .await?;
 
         // Test connection
-        debug!("Executing test query on PostgreSQL");
+        log_debug!("Executing test query on PostgreSQL");
         match sqlx::query("SELECT 1").execute(&pool).await {
-            Ok(_) => info!("PostgreSQL connection successful"),
+            Ok(_) => log_info!("PostgreSQL connection successful"),
             Err(e) => {
-                error!("Failed to connect to PostgreSQL: {}", e);
+                log_error!("Failed to connect to PostgreSQL: {}", e);
                 return Err(e);
             }
         }

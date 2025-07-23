@@ -7,7 +7,7 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 use sqlx::{FromRow, PgPool};
-use tracing::error;
+use crate::log_error;
 
 /// Структура для извлечения параметров запроса
 #[derive(Deserialize, Debug)]
@@ -55,7 +55,7 @@ pub async fn handle(Extension(pool): Extension<PgPool>, Query(params): Query<Par
     let db_models = match fetch_db_models(&pool, &params).await {
         Ok(rows) => rows,
         Err(e) => {
-            error!("Ошибка при выполнении запроса к базе данных: {}", e);
+            log_error!("Ошибка при выполнении запроса к базе данных: {}", e);
             return internal_server_error();
         }
     };

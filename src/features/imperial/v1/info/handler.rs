@@ -6,7 +6,7 @@ use axum::{
 };
 
 use sqlx::PgPool;
-use tracing::error;
+use crate::log_error;
 
 use crate::{
     analytics::db::handle_thread_analytics,shared::enums::{Language, ThreadType, Unit}, shared::utils::number::NumberFormatter, features::imperial::v1::info::{
@@ -326,7 +326,7 @@ pub async fn handle(
             (StatusCode::OK, Json(response)).into_response()
         }
         Err(e) => {
-            error!("Database query error: {}", e);
+            log_error!("Database query error: {}", e);
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(serde_json::json!({

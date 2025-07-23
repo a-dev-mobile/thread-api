@@ -9,7 +9,7 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 use sqlx::{PgPool, Row};
 use std::collections::HashSet;
-use tracing::{error, info};
+use crate::{log_error, log_info};
 
 #[derive(Deserialize, Debug)]
 pub struct ToleranceParams {
@@ -54,7 +54,7 @@ pub async fn handle(
     Extension(pool): Extension<PgPool>,
     Query(params): Query<ToleranceParams>,
 ) -> impl IntoResponse {
-    info!(
+    log_info!(
         "Handling tolerance request for diameter: {}, pitch: {}",
         params.diameter, params.pitch
     );
@@ -75,7 +75,7 @@ pub async fn handle(
     {
         Ok(rows) => rows,
         Err(e) => {
-            error!("Failed to fetch column information: {}", e);
+            log_error!("Failed to fetch column information: {}", e);
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(serde_json::json!({

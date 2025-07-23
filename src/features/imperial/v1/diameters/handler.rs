@@ -3,7 +3,7 @@ use axum::{
 };
 use serde::Serialize;
 use sqlx::{FromRow, PgPool};
-use tracing::error;
+use crate::log_error;
 
 /// Модель данных из базы данных
 #[derive(Serialize, FromRow)]
@@ -38,7 +38,7 @@ pub async fn handle(Extension(pool): Extension<PgPool>) -> Response {
     let db_records = match fetch_diameters(&pool).await {
         Ok(records) => records,
         Err(e) => {
-            error!("Ошибка при выполнении запроса к базе данных: {}", e);
+            log_error!("Ошибка при выполнении запроса к базе данных: {}", e);
             return internal_server_error();
         }
     };

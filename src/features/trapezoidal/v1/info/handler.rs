@@ -19,7 +19,7 @@ use axum::{
     Json,
 };
 use sqlx::PgPool;
-use tracing::error;
+use crate::log_error;
 
 pub async fn handle(
     Extension(pool): Extension<PgPool>,
@@ -40,7 +40,7 @@ pub async fn handle(
     {
         Ok(data) => data,
         Err(e) => {
-            error!("Database query error: {}", e);
+            log_error!("Database query error: {}", e);
             let error_message = if e.to_string().contains("no rows") {
                 "No thread specifications found for the given diameter and pitch"
             } else {

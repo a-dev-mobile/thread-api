@@ -3,7 +3,7 @@ use axum::{
     extract::Extension, http::StatusCode, response::IntoResponse, response::Response, Json,
 };
 use sqlx::PgPool;
-use tracing::error;
+use crate::log_error;
 
 const DIAMETERS_QUERY: &str = "
 SELECT DISTINCT ON (diameter, pitch)
@@ -21,7 +21,7 @@ pub async fn handle(Extension(pool): Extension<PgPool>) -> Response {
     let db_records = match fetch_diameters(&pool).await {
         Ok(records) => records,
         Err(e) => {
-            error!("Ошибка при выполнении запроса к базе данных: {}", e);
+            log_error!("Ошибка при выполнении запроса к базе данных: {}", e);
             return internal_server_error();
         }
     };

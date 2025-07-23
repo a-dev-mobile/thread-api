@@ -5,7 +5,7 @@ use axum::{
 };
 use serde::Deserialize;
 use sqlx::PgPool;
-use tracing::info;
+use crate::log_info;
 
 use crate::shared::utils::db::{execute_query, ResponseType};
 
@@ -20,7 +20,7 @@ pub async fn diameters(
     Extension(pool): Extension<PgPool>,
     Query(params): Query<DiameterParams>,
 ) -> impl IntoResponse {
-    info!("Handling diameters request with parameters: {:?}", params);
+    log_info!("Handling diameters request with parameters: {:?}", params);
     // Clone the order to own the String
     let order = params.order.clone().unwrap_or_else(|| "asc".to_string());
 

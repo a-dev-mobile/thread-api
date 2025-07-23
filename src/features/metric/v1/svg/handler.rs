@@ -17,7 +17,7 @@ use crate::features::metric::v1::svg::params::SvgParams;
 use sqlx::PgPool;
 use std::path::PathBuf;
 use tokio::fs;
-use tracing::{error, info};
+use crate::{log_error, log_info};
 
 pub async fn svg(
     Extension(pool): Extension<PgPool>,
@@ -33,7 +33,7 @@ pub async fn svg(
     let thread_info: ThreadInfo = match serde_json::from_value(thread_info_json.clone()) {
         Ok(info) => info,
         Err(err) => {
-            info!(
+            log_info!(
                 "Error deserializing JSON: {}",
                 serde_json::to_string(&thread_info_json)
                     .unwrap_or_else(|_| "invalid JSON".to_string())
@@ -46,7 +46,7 @@ pub async fn svg(
         }
     };
 
-    info!("Thread information received: {:?}", thread_info);
+    log_info!("Thread information received: {:?}", thread_info);
 
     if params.show_dimensions {
         // Вызов функции add_or_increment_thread в фоне через модуль analytics
@@ -61,7 +61,7 @@ pub async fn svg(
     let result_load_svg_template = match load_svg_template(&params.type_, &params.theme).await {
         Ok(template) => template,
         Err(err) => {
-            error!("Error loading SVG template: {}", err);
+            log_error!("Error loading SVG template: {}", err);
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 "Failed to load SVG template.".to_string(),
