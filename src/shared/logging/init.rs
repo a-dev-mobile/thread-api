@@ -1,5 +1,6 @@
 use crate::logging::enums::LogLevel;
 use crate::logging::structs::LogConfig;
+use chrono::Utc;
 use std::io::{self, Write};
 use std::sync::{Mutex, OnceLock};
 
@@ -23,21 +24,30 @@ impl AppLogger {
             return;
         }
 
-        // ANSI коды цветов
-        let (color_code, reset_code) = match level {
-            LogLevel::Error => ("\x1b[31m", "\x1b[0m"), // Красный
-            LogLevel::Warn => ("\x1b[33m", "\x1b[0m"),  // Желтый
-            LogLevel::Info => ("\x1b[32m", "\x1b[0m"),  // Зеленый
-            LogLevel::Debug => ("\x1b[36m", "\x1b[0m"), // Голубой
+        // Определяем есть ли TTY для цветов (для Docker/Loki отключаем цвета)
+        let use_colors = std::env::var("TERM").is_ok() && std::env::var("NO_COLOR").is_err();
+        
+        let (color_code, reset_code) = if use_colors {
+            match level {
+                LogLevel::Error => ("\x1b[31m", "\x1b[0m"), // Красный
+                LogLevel::Warn => ("\x1b[33m", "\x1b[0m"),  // Желтый
+                LogLevel::Info => ("\x1b[32m", "\x1b[0m"),  // Зеленый
+                LogLevel::Debug => ("\x1b[36m", "\x1b[0m"), // Голубой
+            }
+        } else {
+            ("", "") // Без цветов для non-TTY (например, Docker logs -> Loki)
         };
 
+        // Добавляем временную метку для лучшей совместимости с Loki
+        let timestamp = Utc::now().format("%Y-%m-%d %H:%M:%S%.3f");
+        
         // Выводим в stderr для ошибок, в stdout для остального
         match level {
             LogLevel::Error => {
-                let _ = writeln!(io::stderr(), "{}[{}]{} {}", color_code, level, reset_code, message);
+                let _ = writeln!(io::stderr(), "{} {}[{}]{} {}", timestamp, color_code, level, reset_code, message);
             }
             _ => {
-                let _ = writeln!(io::stdout(), "{}[{}]{} {}", color_code, level, reset_code, message);
+                let _ = writeln!(io::stdout(), "{} {}[{}]{} {}", timestamp, color_code, level, reset_code, message);
             }
         }
     }
