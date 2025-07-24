@@ -25,7 +25,6 @@ COPY config ./config
 COPY static ./static
 
 # Build application
-ENV SQLX_OFFLINE=true
 RUN cargo build --release && \
     strip target/release/thread_api
 
