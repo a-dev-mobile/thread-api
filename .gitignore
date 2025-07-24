@@ -12,4 +12,3 @@ rust_doc
 
 .vscode/tasks.json
 makefile
-.sqlx/**.json

@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT analytics.add_or_increment_thread($1)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "add_or_increment_thread",
+        "type_info": "Void"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "5309eb376288b3881229e714967401a29508ff65fdcd3ec8b40dd885b4d42697"
+}
