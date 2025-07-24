@@ -1,10 +1,11 @@
-log_level = "debug,sqlx=debug"
-log_format = "json"
-app_env = "dev"
+[logging]
+level = "debug"
+format = "text"
 
-[server]
-address = "0.0.0.0"
-port = 5001
+[postgres]
+timeout = 30               # seconds
+max_connections = 20
+min_connections = 5
+max_lifetime = 1800        # 30 minutes
+idle_timeout = 600         # 10 minutes
 
-[database]
-url = ""
