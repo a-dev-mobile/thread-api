@@ -1,7 +1,6 @@
 use serde::Serialize;
 use sqlx::FromRow;
 
-
 #[derive(Serialize, FromRow, Debug, Clone)]
 pub struct ModelV2ImperialDB {
     pub id: i64,

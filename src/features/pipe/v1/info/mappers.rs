@@ -1,8 +1,7 @@
 use super::models::{request_pipe_info::RequestPipeInfo, response_pipe_info::ResponsePipeInfo};
-use crate::analytics::db;
-use crate::shared::enums::{Language, Unit};
 use crate::features::pipe::v1::common::models::model_pipe_db::ModelPipeDB;
 use crate::features::pipe::v1::common::models::{ModelPipeAdditionalInfo, ModelPipeDiameterInfo};
+use crate::shared::enums::{Language, Unit};
 use crate::shared::utils::number::NumberFormatter;
 
 impl ResponsePipeInfo {
@@ -67,11 +66,7 @@ impl ResponsePipeInfo {
     }
 
     /// Преобразует основные параметры резьбы в список дополнительной информации.
-    fn map_main_info(
-        is_male: bool,
-        db: &ModelPipeDB,
-        request: &RequestPipeInfo,
-    ) -> Vec<ModelPipeAdditionalInfo> {
+    fn map_main_info(is_male: bool, db: &ModelPipeDB, request: &RequestPipeInfo) -> Vec<ModelPipeAdditionalInfo> {
         let mut main_info = Vec::new();
         let formatter = |value: f64| {
             NumberFormatter::convert_and_round_to_string(
@@ -124,11 +119,9 @@ impl ResponsePipeInfo {
 
         // Глубина резьбы
         let thread_depth = if is_male {
-            (db.ex_major_dia_max.unwrap_or_default() - db.ex_minor_dia_max.unwrap_or_default())
-                / 2.0
+            (db.ex_major_dia_max.unwrap_or_default() - db.ex_minor_dia_max.unwrap_or_default()) / 2.0
         } else {
-            (db.in_major_dia_min.unwrap_or_default() - db.in_minor_dia_max.unwrap_or_default())
-                / 2.0
+            (db.in_major_dia_min.unwrap_or_default() - db.in_minor_dia_max.unwrap_or_default()) / 2.0
         };
         main_info.push(ModelPipeAdditionalInfo {
             name: name("Thread depth", "Глубина резьбы"),
@@ -140,10 +133,7 @@ impl ResponsePipeInfo {
     }
 
     /// Преобразует данные о диаметрах резьбы.
-    fn map_diameter_info(
-        db: &ModelPipeDB,
-        request: &RequestPipeInfo,
-    ) -> Vec<ModelPipeDiameterInfo> {
+    fn map_diameter_info(db: &ModelPipeDB, request: &RequestPipeInfo) -> Vec<ModelPipeDiameterInfo> {
         let mut result = Vec::new();
         let is_male = db.class_name.is_some();
         let name = Self::get_localized_name(&request.language);
@@ -248,10 +238,7 @@ impl ResponsePipeInfo {
     }
 
     /// Преобразует дополнительные параметры резьбы.
-    fn map_additional_info(
-        db: &ModelPipeDB,
-        request: &RequestPipeInfo,
-    ) -> Vec<ModelPipeAdditionalInfo> {
+    fn map_additional_info(db: &ModelPipeDB, request: &RequestPipeInfo) -> Vec<ModelPipeAdditionalInfo> {
         let mut result = Vec::new();
         let is_male = db.class_name.is_some();
         let name = Self::get_localized_name(&request.language);
@@ -328,20 +315,14 @@ impl ResponsePipeInfo {
         // Полезная длина резьбы (оценка: 6 витков)
         let short_length = 4.0 * p;
         result.push(ModelPipeAdditionalInfo {
-            name: name(
-                "Length of Engagement (short)",
-                "Длина свинчивания (короткая)",
-            ),
+            name: name("Length of Engagement (short)", "Длина свинчивания (короткая)"),
             value: formatter(short_length),
             description: None,
         });
         // Нормальная длина (N) - 6 витков
         let normal_length = 6.0 * p;
         result.push(ModelPipeAdditionalInfo {
-            name: name(
-                "Length of Engagement (normal)",
-                "Длина свинчивания (нормальная)",
-            ),
+            name: name("Length of Engagement (normal)", "Длина свинчивания (нормальная)"),
             value: formatter(normal_length),
             description: None,
         });
@@ -368,7 +349,7 @@ impl ResponsePipeInfo {
     }
 
     /// Возвращает функцию для получения локализованных имен (En/Ru).
-    fn get_localized_name<'a>(language: &'a Language) -> impl Fn(&str, &str) -> String + 'a {
+    fn get_localized_name(language: &Language) -> impl Fn(&str, &str) -> String + '_ {
         move |en, ru| match language {
             Language::Ru => ru.to_string(),
             Language::En => en.to_string(),

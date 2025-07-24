@@ -1,7 +1,7 @@
+use crate::{log_error, log_info};
 use axum::{http::StatusCode, Json};
 use serde_json::Value;
 use sqlx::{postgres::PgArguments, Column, PgPool, Row};
-use crate::{log_error, log_info};
 
 /// Тип ответа для функции `execute_query`.
 pub enum ResponseType {
@@ -43,10 +43,7 @@ where
         Ok(r) => r,
         Err(e) => {
             log_error!("Error executing query: {}", e);
-            return Err((
-                StatusCode::INTERNAL_SERVER_ERROR,
-                format!("Ошибка базы данных: {}", e),
-            ));
+            return Err((StatusCode::INTERNAL_SERVER_ERROR, format!("Ошибка базы данных: {}", e)));
         }
     };
 
@@ -113,7 +110,6 @@ fn row_to_json(row: &sqlx::postgres::PgRow, precision: Option<usize>) -> Value {
             // Отлов ошибки обработки
             let error_message = format!(
                 "Failed to process column '{}', data type: '{:?}'. The data type may not be supported.",
-
                 column_name,
                 column.type_info()
             );

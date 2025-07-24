@@ -1,4 +1,5 @@
 // src/routes/v1/trapezoidal/tolerance/trapezoidal_tolerance_handler.rs
+use crate::{log_error, log_info};
 use axum::{
     extract::{Extension, Query},
     http::StatusCode,
@@ -9,7 +10,6 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 use sqlx::{PgPool, Row};
 use std::collections::HashSet;
-use crate::{log_error, log_info};
 
 #[derive(Deserialize, Debug)]
 pub struct ToleranceParams {
@@ -50,13 +50,11 @@ fn parse_tolerance(tolerance: &str) -> ToleranceKey {
     }
 }
 
-pub async fn handle(
-    Extension(pool): Extension<PgPool>,
-    Query(params): Query<ToleranceParams>,
-) -> impl IntoResponse {
+pub async fn handle(Extension(pool): Extension<PgPool>, Query(params): Query<ToleranceParams>) -> impl IntoResponse {
     log_info!(
         "Handling tolerance request for diameter: {}, pitch: {}",
-        params.diameter, params.pitch
+        params.diameter,
+        params.pitch
     );
 
     // Get column names to determine available tolerances
@@ -107,13 +105,7 @@ pub async fn handle(
                     // Convert lowercase tolerance to uppercase for female threads
                     let upper_tolerance = tolerance
                         .chars()
-                        .map(|c| {
-                            if c.is_alphabetic() {
-                                c.to_ascii_uppercase()
-                            } else {
-                                c
-                            }
-                        })
+                        .map(|c| if c.is_alphabetic() { c.to_ascii_uppercase() } else { c })
                         .collect::<String>();
                     female_tolerances.insert(upper_tolerance);
                 }
@@ -130,7 +122,7 @@ pub async fn handle(
     )
     .fetch_one(&pool)
     .await
-    .map_or(false, |row| row.exists.unwrap_or(false));
+    .is_ok_and(|row| row.exists.unwrap_or(false));
 
     if !thread_exists {
         return (

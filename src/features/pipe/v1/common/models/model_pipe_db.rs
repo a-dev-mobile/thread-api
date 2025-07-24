@@ -1,7 +1,7 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 
-#[derive(Debug, Serialize, Deserialize, FromRow,Clone)]
+#[derive(Debug, Serialize, Deserialize, FromRow, Clone)]
 pub struct ModelPipeDB {
     pub id: i32,
     pub designation: f64,

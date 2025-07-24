@@ -7,7 +7,6 @@ use serde_json::Value;
 
 use super::types::AppError;
 
-
 #[derive(Serialize)]
 struct ErrorResponse {
     code: &'static str,

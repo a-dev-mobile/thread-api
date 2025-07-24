@@ -1,17 +1,18 @@
 // src/routes/v1/trapezoidal/info/handler_trapezoidal_info.rs
 
 use crate::{
-    analytics::db::handle_thread_analytics, shared::error::AppError, features::trapezoidal::{
+    analytics::db::handle_thread_analytics,
+    features::trapezoidal::{
         common::{
             calculators::{calculate_additional_info, calculate_diameter_info, calculate_main_info, get_thread_info},
             db::ThreadDataService,
         },
-        v1::info::{
-            models::{request::RequestTrapezoidalInfo, response::ResponseTrapezoidalInfo},
-        },
-    }
+        v1::info::models::{request::RequestTrapezoidalInfo, response::ResponseTrapezoidalInfo},
+    },
+    shared::error::AppError,
 };
 
+use crate::log_error;
 use axum::{
     extract::{Extension, Query},
     http::StatusCode,
@@ -19,23 +20,17 @@ use axum::{
     Json,
 };
 use sqlx::PgPool;
-use crate::log_error;
 
 pub async fn handle(
     Extension(pool): Extension<PgPool>,
     Query(params): Query<RequestTrapezoidalInfo>,
 ) -> Result<impl IntoResponse, AppError> {
     // Initialize database service
-    let db_service = ThreadDataService::new(pool.clone());  // Clone pool for analytics use
+    let db_service = ThreadDataService::new(pool.clone()); // Clone pool for analytics use
 
     // Fetch thread data using the core service
     let thread_data = match db_service
-        .fetch_thread_data(
-            params.diameter,
-            params.pitch,
-            params.type_thread,
-            &params.tolerance,
-        )
+        .fetch_thread_data(params.diameter, params.pitch, params.type_thread, &params.tolerance)
         .await
     {
         Ok(data) => data,
@@ -68,7 +63,7 @@ pub async fn handle(
 
     // Clone designation for analytics
     let designation_clone = designation.clone();
-    
+
     // Clone pool for background task
     let pool_clone = pool.clone();
 

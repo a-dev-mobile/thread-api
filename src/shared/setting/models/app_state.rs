@@ -7,9 +7,6 @@ use crate::{
             handler::{HealthHandler, HealthHandlerV1},
             service::{HealthService, HealthServiceImpl},
         },
-
-      
-        
     },
     shared::{database::service::PostgresService, setting::models::app_setting::AppSettings},
 };
@@ -17,8 +14,6 @@ use crate::{
 pub struct AppState {
     pub settings: Arc<AppSettings>,
     pub postgres_service: Arc<PostgresService>,
-
-  
 
     // Health feature dependencies
     pub health_handler: Arc<dyn HealthHandler>,
@@ -37,7 +32,7 @@ impl AppState {
         Self {
             settings,
             postgres_service,
-        
+
             health_handler,
             health_service,
         }

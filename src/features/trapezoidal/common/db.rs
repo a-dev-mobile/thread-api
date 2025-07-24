@@ -1,13 +1,13 @@
 // src/routes/v1/trapezoidal/core/db.rs
 
-use sqlx::{PgPool, Row};
 use crate::{log_debug, log_error};
+use sqlx::{PgPool, Row};
 
 use crate::{
-   shared::enums::ThreadType,
     features::trapezoidal::common::models::{
         ModelTrapezoidalDiameterBasic, ModelTrapezoidalOtherDimensions, ModelTrapezoidalTolerance,
     },
+    shared::enums::ThreadType,
 };
 
 pub struct ThreadDataService {
@@ -34,13 +34,9 @@ impl ThreadDataService {
         tolerance: &str,
     ) -> Result<ThreadData, sqlx::Error> {
         let main_query = "SELECT * FROM trapezoidal.main WHERE diameter = $1::integer AND pitch = $2::double precision";
-        let basic_dim_query =
-            "SELECT * FROM trapezoidal.basic_dimensions WHERE p = $1::double precision";
+        let basic_dim_query = "SELECT * FROM trapezoidal.basic_dimensions WHERE p = $1::double precision";
 
-        log_debug!(
-            "Executing queries with params: diameter={}, pitch={}",
-            diameter, pitch
-        );
+        log_debug!("Executing queries with params: diameter={}, pitch={}", diameter, pitch);
 
         let main_row = sqlx::query(main_query)
             .bind(diameter)
@@ -48,10 +44,7 @@ impl ThreadDataService {
             .fetch_one(&self.pool)
             .await?;
 
-        let basic_dim_row = sqlx::query(basic_dim_query)
-            .bind(pitch)
-            .fetch_one(&self.pool)
-            .await?;
+        let basic_dim_row = sqlx::query(basic_dim_query).bind(pitch).fetch_one(&self.pool).await?;
 
         let type_suffix = match thread_type {
             ThreadType::Male => "_m",

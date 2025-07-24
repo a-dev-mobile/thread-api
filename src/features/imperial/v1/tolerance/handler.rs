@@ -1,3 +1,4 @@
+use crate::log_error;
 use axum::{
     extract::{Extension, Query},
     http::StatusCode,
@@ -7,7 +8,6 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 use sqlx::{FromRow, PgPool};
-use crate::log_error;
 
 /// Структура для извлечения параметров запроса
 #[derive(Deserialize, Debug)]
@@ -80,13 +80,11 @@ pub async fn handle(Extension(pool): Extension<PgPool>, Query(params): Query<Par
 
 /// Функция для вызова PostgreSQL функции и получения данных из базы
 async fn fetch_db_models(pool: &PgPool, params: &Params) -> Result<Vec<DbModel>, sqlx::Error> {
-    sqlx::query_as::<_, DbModel>(
-        "SELECT * FROM imperial.get_diameter_tolerance_data($1, $2)"
-    )
-    .bind(&params.diameter)
-    .bind(params.tpi)
-    .fetch_all(pool)
-    .await
+    sqlx::query_as::<_, DbModel>("SELECT * FROM imperial.get_diameter_tolerance_data($1, $2)")
+        .bind(&params.diameter)
+        .bind(params.tpi)
+        .fetch_all(pool)
+        .await
 }
 
 /// Вспомогательная функция для создания ToleranceInfo

@@ -1,10 +1,8 @@
+use crate::{log_debug, log_error, log_info};
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
 use std::sync::Arc;
-use crate::{log_debug, log_error, log_info};
 
 use crate::shared::setting::models::app_setting::AppSettings;
-
-
 
 #[derive(Clone)]
 pub struct PostgresConnection {

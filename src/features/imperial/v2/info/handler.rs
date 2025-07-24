@@ -2,18 +2,15 @@ use axum::{
     extract::{Extension, Query},
     http::StatusCode,
     response::IntoResponse,
-    response::Response,
     Json,
 };
 
-use sqlx::PgPool;
 use crate::log_error;
+use sqlx::PgPool;
 
 use crate::{
-    analytics::db::handle_thread_analytics,
-    shared::enums::{Language, ThreadType, Unit},
-
-    features::imperial::v2::info::mappers::ImperialInfoMapper,
+    analytics::db::handle_thread_analytics, features::imperial::v2::info::mappers::ImperialInfoMapper,
+    shared::enums::ThreadType,
 };
 
 use super::models::{db::ModelV2ImperialDB, request::RequestV2ImperialInfo};
@@ -35,24 +32,27 @@ pub async fn handle(
         "SELECT * FROM imperial.main WHERE diameter = $1 AND tpi = $2 AND class_f = $3"
     };
 
-    let db_model = match  sqlx::query_as::<_, ModelV2ImperialDB>(query)
-    .bind(&request.diameter)
-    .bind(request.tpi)
-    .bind(&request.series)
-    .fetch_one(&pool)
-    .await
+    let db_model = match sqlx::query_as::<_, ModelV2ImperialDB>(query)
+        .bind(&request.diameter)
+        .bind(request.tpi)
+        .bind(&request.series)
+        .fetch_one(&pool)
+        .await
     {
         Ok(record) => record,
         Err(e) => {
             log_error!("Database query error: {}", e);
-            return (StatusCode::INTERNAL_SERVER_ERROR, Json(serde_json::json!({
-                "error": format!("Thread with diameter: {}, TPI: {}, class: {} not found",
-                    request.diameter, request.tpi, request.series)
-            })).into_response());
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(serde_json::json!({
+                    "error": format!("Thread with diameter: {}, TPI: {}, class: {} not found",
+                        request.diameter, request.tpi, request.series)
+                }))
+                .into_response(),
+            );
         }
     };
 
-   
     // Generate designation for analytics
     let designation = ImperialInfoMapper::generate_designation1(&db_model, &request.type_);
 
@@ -67,7 +67,6 @@ pub async fn handle(
 
     // Map database record to response
     let response = ImperialInfoMapper::from_data(db_model, &request);
-
 
     (StatusCode::OK, Json(response).into_response())
 }

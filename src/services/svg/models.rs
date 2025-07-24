@@ -1,7 +1,5 @@
 use crate::services::svg::enums::{FontFamily, FontWeight, TextAnchor};
 
-
-
 #[derive(Debug, Clone, Copy)]
 pub struct SvgTextOptions {
     pub font_size: f64,

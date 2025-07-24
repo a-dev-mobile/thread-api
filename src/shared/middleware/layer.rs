@@ -1,10 +1,7 @@
-
-use axum::http::Request;
-use axum::middleware::Next;
-use axum::response::Response;
-use tower_http::cors::{Any, CorsLayer};
 use crate::shared::utils::http;
-use crate::{log_info, log_debug};
+use crate::{log_debug, log_info};
+use axum::http::Request;
+use tower_http::cors::{Any, CorsLayer};
 
 /// Создаёт и настраивает middleware для логирования HTTP-запросов с использованием собственной системы логирования
 pub fn create_trace<B>() -> tower::util::MapRequestLayer<impl Fn(Request<B>) -> Request<B> + Clone> {
@@ -19,20 +16,20 @@ pub fn create_trace<B>() -> tower::util::MapRequestLayer<impl Fn(Request<B>) -> 
         let uri = request.uri().clone();
         let version = request.version();
         let client_ip = http::get_client_ip(&request);
-        
+
         // Извлечение заголовков
         let user_agent = request
             .headers()
             .get("user-agent")
             .and_then(|v| v.to_str().ok())
             .unwrap_or("unknown");
-        
+
         let referer = request
             .headers()
             .get("referer")
             .and_then(|v| v.to_str().ok())
             .unwrap_or("unknown");
-        
+
         let accept_language = request
             .headers()
             .get("accept-language")
@@ -45,7 +42,13 @@ pub fn create_trace<B>() -> tower::util::MapRequestLayer<impl Fn(Request<B>) -> 
         // Подробное логирование на уровне DEBUG
         log_debug!(
             "Request details: {} {} {:?} - IP: {}, User-Agent: {}, Referer: {}, Accept-Language: {}",
-            method, uri, version, client_ip, user_agent, referer, accept_language
+            method,
+            uri,
+            version,
+            client_ip,
+            user_agent,
+            referer,
+            accept_language
         );
 
         request

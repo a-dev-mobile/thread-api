@@ -1,27 +1,21 @@
 use axum::body::Body;
 
+use crate::log_error;
 use axum::http::{Response, StatusCode};
 use axum::response::IntoResponse;
 use axum::Json;
 use axum::{extract::Query, Extension};
 use sqlx::PgPool;
-use crate::log_error;
 
+use crate::features::trapezoidal::common::calculators::{calculate_additional_info, calculate_diameter_info};
+use crate::features::trapezoidal::common::db::ThreadDataService;
+use crate::features::trapezoidal::common::enums::{TypeTrapezoidalAdditionalInfo, TypeTrapezoidalDiameter};
+use crate::features::trapezoidal::v1::svg_dimensions::models::RequestSvgDimension;
 use crate::services::svg::enums::{FontFamily, FontWeight, TextAnchor};
 use crate::shared::enums::{Language, ThreadStandard, ThreadType};
 use crate::shared::error::AppError;
-use crate::features::trapezoidal::common::calculators::{
-    calculate_additional_info, calculate_diameter_info,
-};
-use crate::features::trapezoidal::common::db::ThreadDataService;
-use crate::features::trapezoidal::common::enums::{
-    TypeTrapezoidalAdditionalInfo, TypeTrapezoidalDiameter,
-};
-use crate::features::trapezoidal::v1::svg_dimensions::models::RequestSvgDimension;
 
-use crate::services::svg::{
-    SvgService, SvgText,  TextOptionsGenerator,
-};
+use crate::services::svg::{SvgService, SvgText, TextOptionsGenerator};
 
 pub async fn handle(
     Extension(pool): Extension<PgPool>,
@@ -31,12 +25,7 @@ pub async fn handle(
 
     // Fetch thread data using the core service
     let thread_data = match db_service
-        .fetch_thread_data(
-            params.diameter,
-            params.pitch,
-            params.thread_type,
-            &params.tolerance,
-        )
+        .fetch_thread_data(params.diameter, params.pitch, params.thread_type, &params.tolerance)
         .await
     {
         Ok(data) => data,
@@ -101,11 +90,7 @@ pub async fn handle(
     let svg_service = SvgService::new("./static/svg");
 
     let mut svg_content = svg_service
-        .load_template(
-            ThreadStandard::Trapezoidal,
-            params.thread_type,
-            params.theme,
-        )
+        .load_template(ThreadStandard::Trapezoidal, params.thread_type, params.theme)
         .await?;
     //
     //
@@ -115,83 +100,28 @@ pub async fn handle(
     //
     //
     //
-    let text_options_default = svg_service.create_custom_text_options(
-        40.0,
-        0.0,
-        TextAnchor::Start,
-        FontWeight::Normal,
-        FontFamily::Arial,
-    );
-    let text_option_30_90_center_normal = svg_service.create_custom_text_options(
-        30.0,
-        -90.0,
-        TextAnchor::Middle,
-        FontWeight::Normal,
-        FontFamily::Arial,
-    );
-    let text_option_20_0_center_normal = svg_service.create_custom_text_options(
-        20.0,
-        0.0,
-        TextAnchor::Middle,
-        FontWeight::Normal,
-        FontFamily::Arial,
-    );
-    let text_option_20_90_center_normal = svg_service.create_custom_text_options(
-        20.0,
-        -90.0,
-        TextAnchor::Middle,
-        FontWeight::Normal,
-        FontFamily::Arial,
-    );
-    let text_option_17_90_center_normal = svg_service.create_custom_text_options(
-        17.0,
-        -90.0,
-        TextAnchor::Middle,
-        FontWeight::Normal,
-        FontFamily::Arial,
-    );
-    let text_option_30_0_start_normal = svg_service.create_custom_text_options(
-        30.0,
-        0.0,
-        TextAnchor::Start,
-        FontWeight::Normal,
-        FontFamily::Arial,
-    );
-    let text_option_30_0_center_normal = svg_service.create_custom_text_options(
-        30.0,
-        0.0,
-        TextAnchor::Middle,
-        FontWeight::Normal,
-        FontFamily::Arial,
-    );
-    let text_option_40_0_start_normal = svg_service.create_custom_text_options(
-        40.0,
-        0.0,
-        TextAnchor::Start,
-        FontWeight::Normal,
-        FontFamily::Arial,
-    );
-    let text_option_40_0_center_normal = svg_service.create_custom_text_options(
-        40.0,
-        0.0,
-        TextAnchor::Middle,
-        FontWeight::Normal,
-        FontFamily::Arial,
-    );
-    let text_option_40_0_end_normal = svg_service.create_custom_text_options(
-        40.0,
-        0.0,
-        TextAnchor::End,
-        FontWeight::Normal,
-        FontFamily::Arial,
-    );
-    let text_options_diameters_avg = svg_service.create_custom_text_options(
-        12.0,
-        -90.0,
-        TextAnchor::Middle,
-        FontWeight::Normal,
-        FontFamily::Arial,
-    );
+    let text_options_default =
+        svg_service.create_custom_text_options(40.0, 0.0, TextAnchor::Start, FontWeight::Normal, FontFamily::Arial);
+    let text_option_30_90_center_normal =
+        svg_service.create_custom_text_options(30.0, -90.0, TextAnchor::Middle, FontWeight::Normal, FontFamily::Arial);
+    let text_option_20_0_center_normal =
+        svg_service.create_custom_text_options(20.0, 0.0, TextAnchor::Middle, FontWeight::Normal, FontFamily::Arial);
+    let text_option_20_90_center_normal =
+        svg_service.create_custom_text_options(20.0, -90.0, TextAnchor::Middle, FontWeight::Normal, FontFamily::Arial);
+    let text_option_17_90_center_normal =
+        svg_service.create_custom_text_options(17.0, -90.0, TextAnchor::Middle, FontWeight::Normal, FontFamily::Arial);
+    let text_option_30_0_start_normal =
+        svg_service.create_custom_text_options(30.0, 0.0, TextAnchor::Start, FontWeight::Normal, FontFamily::Arial);
+    let text_option_30_0_center_normal =
+        svg_service.create_custom_text_options(30.0, 0.0, TextAnchor::Middle, FontWeight::Normal, FontFamily::Arial);
+    let text_option_40_0_start_normal =
+        svg_service.create_custom_text_options(40.0, 0.0, TextAnchor::Start, FontWeight::Normal, FontFamily::Arial);
+    let text_option_40_0_center_normal =
+        svg_service.create_custom_text_options(40.0, 0.0, TextAnchor::Middle, FontWeight::Normal, FontFamily::Arial);
+    let text_option_40_0_end_normal =
+        svg_service.create_custom_text_options(40.0, 0.0, TextAnchor::End, FontWeight::Normal, FontFamily::Arial);
+    let text_options_diameters_avg =
+        svg_service.create_custom_text_options(12.0, -90.0, TextAnchor::Middle, FontWeight::Normal, FontFamily::Arial);
     let text_option_40_0_end_bold = svg_service.text_option_40_0_end_bold();
 
     // Get language-specific thread labels
@@ -213,10 +143,7 @@ pub async fn handle(
 
     // For multiple items:
     let mut multiple_items = vec![
-        (
-            SvgText::new(517.0, 194.0 - 5.0, "30°"),
-            text_option_40_0_center_normal,
-        ),
+        (SvgText::new(517.0, 194.0 - 5.0, "30°"), text_option_40_0_center_normal),
         (
             SvgText::new(463.5 - 8., 309.0 - 5.0, ac.value.clone()),
             text_option_30_0_start_normal,
@@ -262,28 +189,19 @@ pub async fn handle(
                 SvgText::new(37.0 - 15.0, 555.0, major_min_max),
                 text_option_30_90_center_normal,
             ),
-            (
-                SvgText::new(37.0 - 5.0, 555.0, major_avg),
-                text_options_diameters_avg,
-            ),
+            (SvgText::new(37.0 - 5.0, 555.0, major_avg), text_options_diameters_avg),
             //
             (
                 SvgText::new(81.0 - 16.0, 590.0, pitch_min_max),
                 text_option_30_90_center_normal,
             ),
-            (
-                SvgText::new(81.0 - 5.0, 590.0, pitch_avg),
-                text_options_diameters_avg,
-            ),
+            (SvgText::new(81.0 - 5.0, 590.0, pitch_avg), text_options_diameters_avg),
             // minor
             (
                 SvgText::new(131.5 - 17.0, 630.5, minor_min_max),
                 text_option_30_90_center_normal,
             ),
-            (
-                SvgText::new(131.5 - 5.0, 630.5, minor_avg),
-                text_options_diameters_avg,
-            ),
+            (SvgText::new(131.5 - 5.0, 630.5, minor_avg), text_options_diameters_avg),
             (
                 SvgText::new(212.0 - 5.0, 372.5, z.value.clone()),
                 text_option_17_90_center_normal,
@@ -298,26 +216,16 @@ pub async fn handle(
                 SvgText::new(917.0 - 17.0, 621.5, minor_min_max),
                 text_option_30_90_center_normal,
             ),
+            (SvgText::new(917.0 - 5.0, 621.5, minor_avg), text_options_diameters_avg),
             (
-                SvgText::new(917.0 - 5.0, 621.5, minor_avg),
-                text_options_diameters_avg,
-            ),
-            (
-                SvgText::new(
-                    1035. - 5.0,
-                    545.5,
-                    format!("{} ø{}", min_label, &major_diameter.min),
-                ),
+                SvgText::new(1035. - 5.0, 545.5, format!("{} ø{}", min_label, &major_diameter.min)),
                 text_option_30_90_center_normal,
             ),
             (
                 SvgText::new(973. - 20.0, 589.5, pitch_min_max),
                 text_option_30_90_center_normal,
             ),
-            (
-                SvgText::new(973. - 5.0, 589.5, pitch_avg),
-                text_options_diameters_avg,
-            ),
+            (SvgText::new(973. - 5.0, 589.5, pitch_avg), text_options_diameters_avg),
             (
                 SvgText::new(780.0, 309.0 - 5.0, r1.value.clone()),
                 text_option_30_0_center_normal,

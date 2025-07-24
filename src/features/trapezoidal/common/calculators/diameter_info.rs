@@ -1,7 +1,7 @@
-use crate::shared::enums::{Language, ThreadType, Unit};
 use crate::features::trapezoidal::common::models::ModelTrapezoidalDiameterBasic;
 use crate::features::trapezoidal::common::models::ModelTrapezoidalDiameterInfo;
 use crate::features::trapezoidal::common::models::ModelTrapezoidalTolerance;
+use crate::shared::enums::{Language, ThreadType, Unit};
 use crate::shared::utils::number::NumberFormatter;
 
 use crate::features::trapezoidal::common::enums::TypeTrapezoidalDiameter;
@@ -53,13 +53,7 @@ fn format_measurement_values(
     let avg = (max + min) / 2.0;
 
     let format_value = |value: f64, is_deviation: bool| {
-        NumberFormatter::convert_and_round_to_string(
-            value,
-            &Unit::Mm,
-            units,
-            precision,
-            is_deviation,
-        )
+        NumberFormatter::convert_and_round_to_string(value, &Unit::Mm, units, precision, is_deviation)
     };
 
     (
@@ -82,8 +76,7 @@ fn create_detailed_measurement(
     units: &Unit,
     precision: Option<usize>,
 ) -> ModelTrapezoidalDiameterInfo {
-    let (max, es_str, basic_str, avg, ei_str, min) =
-        format_measurement_values(basic, es, ei, units, precision);
+    let (max, es_str, basic_str, avg, ei_str, min) = format_measurement_values(basic, es, ei, units, precision);
 
     ModelTrapezoidalDiameterInfo {
         type_trapezoidal_diameter: Some(enum_type_trapezoidal_diameter),
@@ -112,13 +105,7 @@ fn create_female_major_measurement(
         basic: String::new(),
         avg: String::new(),
         ei: String::new(),
-        min: NumberFormatter::convert_and_round_to_string(
-            basic,
-            &Unit::Mm,
-            units,
-            precision,
-            false,
-        ),
+        min: NumberFormatter::convert_and_round_to_string(basic, &Unit::Mm, units, precision, false),
     }
 }
 
@@ -188,12 +175,7 @@ fn create_female_measurements(
             units,
             precision,
         ),
-        create_female_major_measurement(
-            nomenclature.major.clone(),
-            basic_diameters.d4,
-            units,
-            precision,
-        ),
+        create_female_major_measurement(nomenclature.major.clone(), basic_diameters.d4, units, precision),
     ]
 }
 
@@ -210,11 +192,7 @@ pub fn calculate_diameter_info(
     let name = DiameterName::new(&language, &type_thread);
 
     match type_thread {
-        ThreadType::Male => {
-            create_male_measurements(basic_diameters, tolerances, &name, &units, precision)
-        }
-        ThreadType::Female => {
-            create_female_measurements(basic_diameters, tolerances, &name, &units, precision)
-        }
+        ThreadType::Male => create_male_measurements(basic_diameters, tolerances, &name, &units, precision),
+        ThreadType::Female => create_female_measurements(basic_diameters, tolerances, &name, &units, precision),
     }
 }

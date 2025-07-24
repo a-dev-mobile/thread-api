@@ -1,3 +1,4 @@
+use crate::{log_error, log_info};
 use axum::{
     extract::{Json, State},
     http::HeaderMap,
@@ -6,10 +7,8 @@ use axum::{
 };
 use serde_json::Value;
 use sqlx::PgPool;
-use crate::{log_error, log_info};
 
 use crate::{features::error_reports::models::ErrorReport, shared::utils::http::get_client_ip_from_headers};
-
 
 #[axum::debug_handler]
 pub async fn create_error_report(

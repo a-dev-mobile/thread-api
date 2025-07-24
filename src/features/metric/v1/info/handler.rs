@@ -1,14 +1,12 @@
+use crate::log_info;
 use axum::{
     extract::{Extension, Query},
     response::IntoResponse,
 };
 use serde::Deserialize;
 use sqlx::PgPool;
-use crate::log_info;
 
 use crate::shared::utils::db::{execute_query, ResponseType};
-
-
 
 #[derive(Deserialize, Debug)]
 pub struct InfoParams {
@@ -22,10 +20,7 @@ pub struct InfoParams {
     precision: Option<usize>,
 }
 
-pub async fn info(
-    Extension(pool): Extension<PgPool>,
-    Query(params): Query<InfoParams>,
-) -> impl IntoResponse {
+pub async fn info(Extension(pool): Extension<PgPool>, Query(params): Query<InfoParams>) -> impl IntoResponse {
     log_info!("Processing info request with parameters: {:?}", params);
 
     let query = "SELECT * FROM metric.get_info($1, $2, $3, $4, $5, $6)";

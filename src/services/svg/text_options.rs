@@ -2,10 +2,7 @@
 
 use crate::services::svg::enums::{FontFamily, FontWeight, TextAnchor};
 
-use super::{
- 
-    models::SvgTextOptions,
-};
+use super::models::SvgTextOptions;
 
 /// Trait defining various text styling options for SVG text elements
 pub trait TextOptionsGenerator {

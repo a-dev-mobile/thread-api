@@ -1,6 +1,5 @@
 use serde::Serialize;
 
-
 #[derive(Debug, Serialize, PartialEq, Clone)]
 pub struct ModelPipeDiameterInfo {
     pub name: String,

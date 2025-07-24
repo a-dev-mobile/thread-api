@@ -39,12 +39,7 @@ pub struct Health {
 }
 
 impl Health {
-    pub fn new(
-        status: HealthStatus,
-        uptime: u64,
-        version: String,
-        components: Vec<ComponentHealth>,
-    ) -> Self {
+    pub fn new(status: HealthStatus, uptime: u64, version: String, components: Vec<ComponentHealth>) -> Self {
         Self {
             status,
             timestamp: Utc::now(),
@@ -66,11 +61,15 @@ impl Health {
             return;
         }
 
-        let unhealthy_count = self.components.iter()
+        let unhealthy_count = self
+            .components
+            .iter()
             .filter(|c| c.status == HealthStatus::Unhealthy)
             .count();
 
-        let degraded_count = self.components.iter()
+        let degraded_count = self
+            .components
+            .iter()
             .filter(|c| c.status == HealthStatus::Degraded)
             .count();
 

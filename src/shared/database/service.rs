@@ -1,8 +1,7 @@
-use std::sync::Arc;
 use crate::{log_error, log_info};
+use std::sync::Arc;
 
 use crate::shared::{database::connection::PostgresConnection, setting::models::app_setting::AppSettings};
-
 
 pub struct PostgresService {
     // Connection

@@ -1,10 +1,10 @@
+use crate::log_info;
 use axum::{
     extract::{Extension, Query},
     response::IntoResponse,
 };
 use serde::Deserialize;
 use sqlx::PgPool;
-use crate::log_info;
 
 use crate::shared::utils::db::{execute_query, ResponseType};
 
@@ -14,10 +14,7 @@ pub struct PitchParams {
     language: Option<String>,
 }
 
-pub async fn pitch(
-    Extension(pool): Extension<PgPool>,
-    Query(params): Query<PitchParams>,
-) -> impl IntoResponse {
+pub async fn pitch(Extension(pool): Extension<PgPool>, Query(params): Query<PitchParams>) -> impl IntoResponse {
     log_info!("Handling pitch request with parameters: {:?}", params);
 
     let diameter = params.diameter;

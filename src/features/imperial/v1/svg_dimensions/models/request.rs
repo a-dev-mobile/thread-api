@@ -9,7 +9,7 @@ pub struct RequestSvgDimension {
     pub theme: Theme,
     pub tolerance: String,
     pub diameter: String, // Imperial uses string for fractions like "1/4", "#10"
-    pub tpi: f64,        // Threads per inch instead of pitch
+    pub tpi: f64,         // Threads per inch instead of pitch
     pub language: Language,
     pub units: Unit,
     pub precision: Option<usize>,

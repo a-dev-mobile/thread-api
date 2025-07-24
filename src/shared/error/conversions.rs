@@ -14,11 +14,11 @@ impl From<sqlx::Error> for AppError {
     fn from(err: sqlx::Error) -> Self {
         match &err {
             // Критичные ошибки подключения к БД
-            sqlx::Error::Configuration(_) | 
-            sqlx::Error::Io(_) | 
-            sqlx::Error::Tls(_) => AppError::DatabaseConnectionError {
-                message: err.to_string(),
-            },
+            sqlx::Error::Configuration(_) | sqlx::Error::Io(_) | sqlx::Error::Tls(_) => {
+                AppError::DatabaseConnectionError {
+                    message: err.to_string(),
+                }
+            }
             // Остальные ошибки БД как прикладные
             _ => AppError::DatabaseError(err.to_string()),
         }

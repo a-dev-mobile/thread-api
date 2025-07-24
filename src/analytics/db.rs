@@ -1,5 +1,5 @@
-use sqlx::PgPool;
 use crate::{log_error, log_info};
+use sqlx::PgPool;
 
 /// Добавляет новую запись в таблицу `popular_threads` или инкрементирует `usage_count`, если запись уже существует.
 ///
@@ -11,17 +11,11 @@ use crate::{log_error, log_info};
 /// # Возвращает
 ///
 /// * `Result<(), sqlx::Error>` - Результат выполнения операции.
-pub async fn add_or_increment_thread(
-    pool: &PgPool,
-    full_thread_name: String,
-) -> Result<(), sqlx::Error> {
+pub async fn add_or_increment_thread(pool: &PgPool, full_thread_name: String) -> Result<(), sqlx::Error> {
     // Вызов функции PostgreSQL
-    sqlx::query!(
-        "SELECT analytics.add_or_increment_thread($1)",
-        full_thread_name
-    )
-    .execute(pool)
-    .await?;
+    sqlx::query!("SELECT analytics.add_or_increment_thread($1)", full_thread_name)
+        .execute(pool)
+        .await?;
     Ok(())
 }
 

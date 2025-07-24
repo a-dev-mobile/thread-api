@@ -23,11 +23,7 @@ pub fn calculate_main_info(
             ),
             create_info_item("Thread pitch", format_value(pitch, units, precision), None),
             create_info_item("Thread tolerance", tolerance, None),
-            create_info_item(
-                "Thread depth",
-                format_value(thread_depth, units, precision),
-                None,
-            ),
+            create_info_item("Thread depth", format_value(thread_depth, units, precision), None),
         ],
         Language::Ru => vec![
             create_info_item("Тип резьбы", thread_type_text(type_thread, language), None),
@@ -38,11 +34,7 @@ pub fn calculate_main_info(
             ),
             create_info_item("Шаг резьбы", format_value(pitch, units, precision), None),
             create_info_item("Допуск резьбы", tolerance, None),
-            create_info_item(
-                "Глубина резьбы",
-                format_value(thread_depth, units, precision),
-                None,
-            ),
+            create_info_item("Глубина резьбы", format_value(thread_depth, units, precision), None),
         ],
     }
 }
@@ -51,11 +43,7 @@ fn format_value(value: f64, units: Unit, precision: Option<usize>) -> String {
     NumberFormatter::convert_and_round_to_string(value, &Unit::Mm, &units, precision, false)
 }
 
-fn create_info_item(
-    name: &str,
-    value: String,
-    description: Option<&str>,
-) -> ModelTrapezoidalAdditionalInfo {
+fn create_info_item(name: &str, value: String, description: Option<&str>) -> ModelTrapezoidalAdditionalInfo {
     ModelTrapezoidalAdditionalInfo {
         type_trapezoidal_additional_info: None,
         name: name.to_string(),

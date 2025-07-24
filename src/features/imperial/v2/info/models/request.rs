@@ -1,5 +1,4 @@
-use serde::{Deserialize, Serialize};
-use sqlx::FromRow;
+use serde::Deserialize;
 
 use crate::shared::enums::{Language, ThreadType, Unit};
 
@@ -15,6 +14,3 @@ pub struct RequestV2ImperialInfo {
     pub units: Unit,
     pub precision: Option<usize>,
 }
-
-
-

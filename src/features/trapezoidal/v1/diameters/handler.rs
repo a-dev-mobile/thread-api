@@ -1,9 +1,7 @@
 use crate::features::trapezoidal::v1::diameters::models::{DbModel, ResponseModel};
-use axum::{
-    extract::Extension, http::StatusCode, response::IntoResponse, response::Response, Json,
-};
-use sqlx::PgPool;
 use crate::log_error;
+use axum::{extract::Extension, http::StatusCode, response::IntoResponse, response::Response, Json};
+use sqlx::PgPool;
 
 const DIAMETERS_QUERY: &str = "
 SELECT DISTINCT ON (diameter, pitch)
@@ -42,9 +40,7 @@ pub async fn handle(Extension(pool): Extension<PgPool>) -> Response {
 }
 
 async fn fetch_diameters(pool: &PgPool) -> Result<Vec<DbModel>, sqlx::Error> {
-    sqlx::query_as::<_, DbModel>(DIAMETERS_QUERY)
-        .fetch_all(pool)
-        .await
+    sqlx::query_as::<_, DbModel>(DIAMETERS_QUERY).fetch_all(pool).await
 }
 
 fn internal_server_error() -> Response {

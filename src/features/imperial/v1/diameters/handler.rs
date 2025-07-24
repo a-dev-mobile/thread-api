@@ -1,9 +1,7 @@
-use axum::{
-    extract::Extension, http::StatusCode, response::IntoResponse, response::Response, Json,
-};
+use crate::log_error;
+use axum::{extract::Extension, http::StatusCode, response::IntoResponse, response::Response, Json};
 use serde::Serialize;
 use sqlx::{FromRow, PgPool};
-use crate::log_error;
 
 /// Модель данных из базы данных
 #[derive(Serialize, FromRow)]

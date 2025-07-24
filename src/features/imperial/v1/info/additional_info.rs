@@ -1,5 +1,7 @@
-use crate::{shared::{enums::{Language, ThreadType, Unit}, utils::number::NumberFormatter}};
-
+use crate::shared::{
+    enums::{Language, ThreadType, Unit},
+    utils::number::NumberFormatter,
+};
 
 use super::models::{DbModel, RequestParams, ThreadInfoItem};
 
@@ -33,13 +35,7 @@ pub fn additional_thread_info(params: &RequestParams, db: &DbModel) -> Vec<Threa
             if matches!(params.type_, ThreadType::Male) && db.allowance != 0.0 {
                 items.push(ThreadInfoItem {
                     name: "Allowance".to_string(),
-                    value: NumberFormatter::convert_and_round(
-                        db.allowance,
-                        &Unit::Inch,
-                        units,
-                        precision,
-                    )
-                    .to_string(),
+                    value: NumberFormatter::convert_and_round(db.allowance, &Unit::Inch, units, precision).to_string(),
                     description: None,
                 });
             }
@@ -47,42 +43,27 @@ pub fn additional_thread_info(params: &RequestParams, db: &DbModel) -> Vec<Threa
             items.extend(vec![
                 ThreadInfoItem {
                     name: "Height of fundamental triangle (H)".to_string(),
-                    value: NumberFormatter::convert_and_round(h, &Unit::Inch, units, precision)
-                        .to_string(),
+                    value: NumberFormatter::convert_and_round(h, &Unit::Inch, units, precision).to_string(),
                     description: None,
                 },
                 ThreadInfoItem {
                     name: "Truncation at crest (H/8)".to_string(),
-                    value: NumberFormatter::convert_and_round(h_1_8, &Unit::Inch, units, precision)
-                        .to_string(),
+                    value: NumberFormatter::convert_and_round(h_1_8, &Unit::Inch, units, precision).to_string(),
                     description: None,
                 },
                 ThreadInfoItem {
                     name: "Basic truncation at root (internal thread) (5H/16)".to_string(),
-                    value: NumberFormatter::convert_and_round(
-                        h_5_16,
-                        &Unit::Inch,
-                        units,
-                        precision,
-                    )
-                    .to_string(),
+                    value: NumberFormatter::convert_and_round(h_5_16, &Unit::Inch, units, precision).to_string(),
                     description: None,
                 },
                 ThreadInfoItem {
                     name: "Basic thread depth (3H/8)".to_string(),
-                    value: NumberFormatter::convert_and_round(h_3_8, &Unit::Inch, units, precision)
-                        .to_string(),
+                    value: NumberFormatter::convert_and_round(h_3_8, &Unit::Inch, units, precision).to_string(),
                     description: None,
                 },
                 ThreadInfoItem {
                     name: "Maximum material at root (external thread) (9H/16)".to_string(),
-                    value: NumberFormatter::convert_and_round(
-                        h_9_16,
-                        &Unit::Inch,
-                        units,
-                        precision,
-                    )
-                    .to_string(),
+                    value: NumberFormatter::convert_and_round(h_9_16, &Unit::Inch, units, precision).to_string(),
                     description: None,
                 },
             ]);
@@ -95,13 +76,7 @@ pub fn additional_thread_info(params: &RequestParams, db: &DbModel) -> Vec<Threa
             if matches!(params.type_, ThreadType::Male) && db.allowance != 0.0 {
                 items.push(ThreadInfoItem {
                     name: "Допуск".to_string(),
-                    value: NumberFormatter::convert_and_round(
-                        db.allowance,
-                        &Unit::Inch,
-                        units,
-                        precision,
-                    )
-                    .to_string(),
+                    value: NumberFormatter::convert_and_round(db.allowance, &Unit::Inch, units, precision).to_string(),
                     description: None,
                 });
             }
@@ -109,42 +84,27 @@ pub fn additional_thread_info(params: &RequestParams, db: &DbModel) -> Vec<Threa
             items.extend(vec![
                 ThreadInfoItem {
                     name: "Высота исходного треугольника резьбы (H)".to_string(),
-                    value: NumberFormatter::convert_and_round(h, &Unit::Inch, units, precision)
-                        .to_string(),
+                    value: NumberFormatter::convert_and_round(h, &Unit::Inch, units, precision).to_string(),
                     description: None,
                 },
                 ThreadInfoItem {
                     name: "Срез по вершине резьбы (H/8)".to_string(),
-                    value: NumberFormatter::convert_and_round(h_1_8, &Unit::Inch, units, precision)
-                        .to_string(),
+                    value: NumberFormatter::convert_and_round(h_1_8, &Unit::Inch, units, precision).to_string(),
                     description: None,
                 },
                 ThreadInfoItem {
                     name: "Базовый срез у впадины (внутренняя резьба) (5H/16)".to_string(),
-                    value: NumberFormatter::convert_and_round(
-                        h_5_16,
-                        &Unit::Inch,
-                        units,
-                        precision,
-                    )
-                    .to_string(),
+                    value: NumberFormatter::convert_and_round(h_5_16, &Unit::Inch, units, precision).to_string(),
                     description: None,
                 },
                 ThreadInfoItem {
                     name: "Базовая глубина резьбы (3H/8)".to_string(),
-                    value: NumberFormatter::convert_and_round(h_3_8, &Unit::Inch, units, precision)
-                        .to_string(),
+                    value: NumberFormatter::convert_and_round(h_3_8, &Unit::Inch, units, precision).to_string(),
                     description: None,
                 },
                 ThreadInfoItem {
                     name: "Максимальный материал у впадины (наружная резьба) (9H/16)".to_string(),
-                    value: NumberFormatter::convert_and_round(
-                        h_9_16,
-                        &Unit::Inch,
-                        units,
-                        precision,
-                    )
-                    .to_string(),
+                    value: NumberFormatter::convert_and_round(h_9_16, &Unit::Inch, units, precision).to_string(),
                     description: None,
                 },
             ]);

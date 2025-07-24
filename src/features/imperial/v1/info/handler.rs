@@ -5,21 +5,21 @@ use axum::{
     Json,
 };
 
-use sqlx::PgPool;
 use crate::log_error;
+use sqlx::PgPool;
 
 use crate::{
-    analytics::db::handle_thread_analytics,shared::enums::{Language, ThreadType, Unit}, shared::utils::number::NumberFormatter, features::imperial::v1::info::{
+    analytics::db::handle_thread_analytics,
+    features::imperial::v1::info::{
         additional_info::additional_thread_info,
         models::{DbModel, ImperialInfoResponse, RequestParams},
-    }
+    },
+    shared::enums::{Language, ThreadType, Unit},
+    shared::utils::number::NumberFormatter,
 };
 
 /// Обработчик запроса
-pub async fn handle(
-    Extension(pool): Extension<PgPool>,
-    Query(params): Query<RequestParams>,
-) -> impl IntoResponse {
+pub async fn handle(Extension(pool): Extension<PgPool>, Query(params): Query<RequestParams>) -> impl IntoResponse {
     let is_male = matches!(params.type_, ThreadType::Male);
 
     // Build query based on thread type
@@ -42,11 +42,7 @@ pub async fn handle(
             let params_clone = params.clone();
 
             // Generate designation1 early for analytics
-            let class = if is_male {
-                &record.class_m
-            } else {
-                &record.class_f
-            };
+            let class = if is_male { &record.class_m } else { &record.class_f };
             let designation = format!(
                 "{} - {} {} - {}",
                 record.diameter, record.tpi, record.series_designation, class
@@ -67,11 +63,7 @@ pub async fn handle(
             let le: f64 = 9.0 * pitch;
             let h = (3f64.sqrt() / 2.0) * pitch;
             // Get the appropriate class based on thread type
-            let class = if is_male {
-                &record.class_m
-            } else {
-                &record.class_f
-            };
+            let class = if is_male { &record.class_m } else { &record.class_f };
 
             let description = generate_description(&params.type_, &params.language);
             let (designation1, designation2) = generate_designation(&record, &params);
@@ -150,28 +142,13 @@ pub async fn handle(
                 description,
                 designation1,
                 designation2,
-                decimal_diameter: NumberFormatter::convert_and_round(
-                    d_basic,
-                    &Unit::Inch,
-                    &units,
-                    params.precision,
-                ),
+                decimal_diameter: NumberFormatter::convert_and_round(d_basic, &Unit::Inch, &units, params.precision),
                 tpi: tpi as i32,
-                pitch: NumberFormatter::convert_and_round(
-                    pitch,
-                    &Unit::Inch,
-                    &units,
-                    params.precision,
-                ),
+                pitch: NumberFormatter::convert_and_round(pitch, &Unit::Inch, &units, params.precision),
                 series_designation: record.series_designation,
                 series: class.clone(),
                 type_: params.type_,
-                t_d2: NumberFormatter::convert_and_round(
-                    t_d2,
-                    &Unit::Inch,
-                    &units,
-                    params.precision,
-                ),
+                t_d2: NumberFormatter::convert_and_round(t_d2, &Unit::Inch, &units, params.precision),
                 t_d: NumberFormatter::convert_and_round(t_d, &Unit::Inch, &units, params.precision),
                 allowance: Some(NumberFormatter::convert_and_round(
                     allowance,
@@ -233,9 +210,8 @@ pub async fn handle(
                     &units,
                     params.precision,
                 ),
-                unr_minor_diameter_max: unr_minor_diameter_max.map(|val| {
-                    NumberFormatter::convert_and_round(val, &Unit::Inch, &units, params.precision)
-                }),
+                unr_minor_diameter_max: unr_minor_diameter_max
+                    .map(|val| NumberFormatter::convert_and_round(val, &Unit::Inch, &units, params.precision)),
                 pitch_diameter_tolerance: NumberFormatter::convert_and_round(
                     pitch_diameter_tolerance,
                     &Unit::Inch,
@@ -244,22 +220,10 @@ pub async fn handle(
                 ),
                 major_diam_min2: record
                     .major_diam_min2_m // Fix field name
-                    .map(|val| {
-                        NumberFormatter::convert_and_round(
-                            val,
-                            &Unit::Inch,
-                            &units,
-                            params.precision,
-                        )
-                    }),
+                    .map(|val| NumberFormatter::convert_and_round(val, &Unit::Inch, &units, params.precision)),
                 units: params.units,
                 h: NumberFormatter::convert_and_round(h, &Unit::Inch, &units, params.precision),
-                thread_depth: NumberFormatter::convert_and_round(
-                    0.625 * h,
-                    &Unit::Inch,
-                    &units,
-                    params.precision,
-                ),
+                thread_depth: NumberFormatter::convert_and_round(0.625 * h, &Unit::Inch, &units, params.precision),
 
                 // Calculate and add average diameters
                 major_diameter_avg: NumberFormatter::convert_and_round(
@@ -275,27 +239,14 @@ pub async fn handle(
                     params.precision,
                 ),
                 minor_diameter_avg: match (minor_diameter_max, minor_diameter_min) {
-                    (max, min) => NumberFormatter::convert_and_round(
-                        (max + min) / 2.0,
-                        &Unit::Inch,
-                        &units,
-                        params.precision,
-                    ),
+                    (max, min) => {
+                        NumberFormatter::convert_and_round((max + min) / 2.0, &Unit::Inch, &units, params.precision)
+                    }
                 },
 
                 // Новые поля допусков (отклонений) с форматированием
-                major_diam_es: NumberFormatter::convert_and_round(
-                    major_diam_es,
-                    &Unit::Inch,
-                    &units,
-                    params.precision,
-                ),
-                major_diam_ei: NumberFormatter::convert_and_round(
-                    major_diam_ei,
-                    &Unit::Inch,
-                    &units,
-                    params.precision,
-                ),
+                major_diam_es: NumberFormatter::convert_and_round(major_diam_es, &Unit::Inch, &units, params.precision),
+                major_diam_ei: NumberFormatter::convert_and_round(major_diam_ei, &Unit::Inch, &units, params.precision),
                 pitch_diameter_es: NumberFormatter::convert_and_round(
                     pitch_diameter_es,
                     &Unit::Inch,
@@ -308,18 +259,8 @@ pub async fn handle(
                     &units,
                     params.precision,
                 ),
-                minor_diam_es: NumberFormatter::convert_and_round(
-                    minor_diam_es,
-                    &Unit::Inch,
-                    &units,
-                    params.precision,
-                ),
-                minor_diam_ei: NumberFormatter::convert_and_round(
-                    minor_diam_ei,
-                    &Unit::Inch,
-                    &units,
-                    params.precision,
-                ),
+                minor_diam_es: NumberFormatter::convert_and_round(minor_diam_es, &Unit::Inch, &units, params.precision),
+                minor_diam_ei: NumberFormatter::convert_and_round(minor_diam_ei, &Unit::Inch, &units, params.precision),
                 additional_info: additional_thread_info(&params_clone, &record_clone),
             };
 
@@ -472,11 +413,7 @@ fn calculate_basic_diameters(d_basic: f64, h: f64) -> (f64, f64, f64) {
     // Minor diameter basic = d - (2 × 5/8)H
     let minor_diameter_basic = d_basic - (2.0 * 0.625 * h);
 
-    (
-        major_diameter_basic,
-        pitch_diameter_basic,
-        minor_diameter_basic,
-    )
+    (major_diameter_basic, pitch_diameter_basic, minor_diameter_basic)
 }
 
 pub fn unified_thread_allowance(d: f64, p: f64, le: f64, class: &str) -> Result<f64, String> {
@@ -491,7 +428,7 @@ pub fn unified_thread_allowance(d: f64, p: f64, le: f64, class: &str) -> Result<
             // Round the result to 6 decimal places
             Ok((es * 1_000_000.0).round() / 1_000_000.0)
         }
-        "3A" => Ok(0.0), // Return 0 for class 3A
+        "3A" => Ok(0.0),                                                   // Return 0 for class 3A
         _ => Err("Invalid thread class. Calculation failed.".to_string()), // Return an error for other classes
     }
 }

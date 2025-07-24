@@ -1,11 +1,8 @@
-use crate::features::pipe::v1::common::models::model_pipe_db::ModelPipeDB;
 use super::models::ResponsePipeDiameters;
-use axum::{
-    extract::Extension, http::StatusCode, response::IntoResponse, response::Response, Json,
-};
-use sqlx::PgPool;
+use crate::features::pipe::v1::common::models::model_pipe_db::ModelPipeDB;
 use crate::log_error;
-
+use axum::{extract::Extension, http::StatusCode, response::IntoResponse, response::Response, Json};
+use sqlx::PgPool;
 
 const QUERY_PIPE: &str = "
 SELECT
@@ -30,7 +27,6 @@ FROM pipe.main
 ORDER BY designation ASC;
 ";
 
-
 pub async fn handle(Extension(pool): Extension<PgPool>) -> Response {
     // Выполнение запроса к базе данных
     let db_records = match fetch_diameters(&pool).await {
@@ -42,14 +38,12 @@ pub async fn handle(Extension(pool): Extension<PgPool>) -> Response {
     };
 
     let response = ResponsePipeDiameters::from(db_records);
-    
+
     (StatusCode::OK, Json(response)).into_response()
 }
 
 async fn fetch_diameters(pool: &PgPool) -> Result<Vec<ModelPipeDB>, sqlx::Error> {
-    sqlx::query_as::<_, ModelPipeDB>(QUERY_PIPE)
-        .fetch_all(pool)
-        .await
+    sqlx::query_as::<_, ModelPipeDB>(QUERY_PIPE).fetch_all(pool).await
 }
 
 fn internal_server_error() -> Response {

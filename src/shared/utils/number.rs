@@ -48,12 +48,7 @@ impl NumberFormatter {
     /// let microns = NumberFormatter::convert_and_round(1.0, &Units::Inch, &Units::Micron, Some(1));
     /// assert_eq!(microns, 25400.0);
     /// ```
-    pub fn convert_and_round(
-        value: f64,
-        from_units: &Unit,
-        to_units: &Unit,
-        precision: Option<usize>,
-    ) -> f64 {
+    pub fn convert_and_round(value: f64, from_units: &Unit, to_units: &Unit, precision: Option<usize>) -> f64 {
         if from_units == to_units {
             return match precision {
                 Some(p) => Self::round(value, p),
@@ -119,10 +114,7 @@ impl NumberFormatter {
 
         // Если число целое - убираем десятичную часть
         if formatted.contains('.') {
-            formatted
-                .trim_end_matches('0')
-                .trim_end_matches('.')
-                .to_string()
+            formatted.trim_end_matches('0').trim_end_matches('.').to_string()
         } else {
             formatted
         }

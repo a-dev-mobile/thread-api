@@ -26,13 +26,8 @@ pub fn calculate_additional_info(
                 Language::Ru => "Зазор по вершине резьбы (ac)",
             }
             .to_string(),
-            value: NumberFormatter::convert_and_round(
-                thread_data.other_dimensions.a_c,
-                &Unit::Mm,
-                &units,
-                precision,
-            )
-            .to_string(),
+            value: NumberFormatter::convert_and_round(thread_data.other_dimensions.a_c, &Unit::Mm, &units, precision)
+                .to_string(),
             description: None,
         },
         // h3_H4
@@ -50,13 +45,8 @@ pub fn calculate_additional_info(
             }
             .to_string(),
 
-            value: NumberFormatter::convert_and_round(
-                thread_data.other_dimensions.h4_h3,
-                &Unit::Mm,
-                &units,
-                precision,
-            )
-            .to_string(),
+            value: NumberFormatter::convert_and_round(thread_data.other_dimensions.h4_h3, &Unit::Mm, &units, precision)
+                .to_string(),
             description: None,
         },
         // H1
@@ -67,13 +57,8 @@ pub fn calculate_additional_info(
                 Language::Ru => "Рабочая высота профиля резьбы (H1)",
             }
             .to_string(),
-            value: NumberFormatter::convert_and_round(
-                thread_data.other_dimensions.h1,
-                &Unit::Mm,
-                &units,
-                precision,
-            )
-            .to_string(),
+            value: NumberFormatter::convert_and_round(thread_data.other_dimensions.h1, &Unit::Mm, &units, precision)
+                .to_string(),
             description: None,
         },
         // r1_max
@@ -118,13 +103,8 @@ pub fn calculate_additional_info(
                 Language::Ru => "1/2 рабочей высоты профиля резьбы (z)",
             }
             .to_string(),
-            value: NumberFormatter::convert_and_round(
-                thread_data.other_dimensions.z,
-                &Unit::Mm,
-                &units,
-                precision,
-            )
-            .to_string(),
+            value: NumberFormatter::convert_and_round(thread_data.other_dimensions.z, &Unit::Mm, &units, precision)
+                .to_string(),
             description: None,
         },
     ]

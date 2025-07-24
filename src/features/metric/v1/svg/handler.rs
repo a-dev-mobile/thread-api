@@ -1,8 +1,8 @@
 use crate::analytics::db::handle_thread_analytics;
+use crate::features::metric::models::ThreadInfo;
 use crate::features::metric::v1::svg::coords::initialize;
 use crate::features::metric::v1::svg::db::fetch_thread_info_from_db;
 use crate::features::metric::v1::svg::text_generation::generate_svg_texts;
-use crate::features::metric::models::ThreadInfo;
 
 use axum::{
     extract::{Extension, Query},
@@ -14,15 +14,12 @@ use axum::{
 };
 
 use crate::features::metric::v1::svg::params::SvgParams;
+use crate::{log_error, log_info};
 use sqlx::PgPool;
 use std::path::PathBuf;
 use tokio::fs;
-use crate::{log_error, log_info};
 
-pub async fn svg(
-    Extension(pool): Extension<PgPool>,
-    Query(params): Query<SvgParams>,
-) -> impl IntoResponse {
+pub async fn svg(Extension(pool): Extension<PgPool>, Query(params): Query<SvgParams>) -> impl IntoResponse {
     // Fetching thread information
     let thread_info_json = match fetch_thread_info_from_db(&pool, &params).await {
         Ok(val) => val.0,
@@ -35,8 +32,7 @@ pub async fn svg(
         Err(err) => {
             log_info!(
                 "Error deserializing JSON: {}",
-                serde_json::to_string(&thread_info_json)
-                    .unwrap_or_else(|_| "invalid JSON".to_string())
+                serde_json::to_string(&thread_info_json).unwrap_or_else(|_| "invalid JSON".to_string())
             );
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
@@ -105,11 +101,7 @@ fn send_success_response(content: Vec<u8>) -> axum::http::Response<axum::body::B
 
 async fn load_svg_template(type_: &str, theme: &str) -> Result<String, std::io::Error> {
     // Forming the file name
-    let file_name = format!(
-        "metric-thread-{}-{}.svg",
-        type_.to_lowercase(),
-        theme.to_lowercase()
-    );
+    let file_name = format!("metric-thread-{}-{}.svg", type_.to_lowercase(), theme.to_lowercase());
     let file_path = PathBuf::from("./static/svg").join(file_name);
     fs::read_to_string(file_path).await
 }

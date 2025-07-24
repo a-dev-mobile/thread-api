@@ -1,23 +1,21 @@
 use axum::body::Body;
 
+use crate::log_error;
 use axum::http::{Response, StatusCode};
 use axum::response::IntoResponse;
 use axum::Json;
 use axum::{extract::Query, Extension};
 use sqlx::PgPool;
-use crate::log_error;
 
+use crate::features::imperial::v1::svg_dimensions::models::RequestSvgDimension;
 use crate::services::svg::enums::{FontFamily, FontWeight, TextAnchor};
 use crate::shared::enums::{Language, ThreadStandard, ThreadType, Unit};
 use crate::shared::error::AppError;
-use crate::features::imperial::v1::svg_dimensions::models::RequestSvgDimension;
 
-use crate::shared::utils::number::NumberFormatter;
 use crate::features::imperial::v1::info::models::DbModel;
+use crate::shared::utils::number::NumberFormatter;
 
-use crate::services::svg::{
-      SvgService, SvgText,  TextOptionsGenerator,
-};
+use crate::services::svg::{SvgService, SvgText, TextOptionsGenerator};
 
 pub async fn handle(
     Extension(pool): Extension<PgPool>,
@@ -62,63 +60,24 @@ pub async fn handle(
     let svg_service = SvgService::new("./static/svg");
 
     let mut svg_content = svg_service
-        .load_template(
-            ThreadStandard::Imperial,
-            params.thread_type,
-            params.theme,
-        )
+        .load_template(ThreadStandard::Imperial, params.thread_type, params.theme)
         .await?;
 
     // Create text options
-    let text_option_30_90_center_normal = svg_service.create_custom_text_options(
-        30.0,
-        -90.0,
-        TextAnchor::Middle,
-        FontWeight::Normal,
-        FontFamily::Arial,
-    );
-    let text_option_20_0_center_normal = svg_service.create_custom_text_options(
-        20.0,
-        0.0,
-        TextAnchor::Middle,
-        FontWeight::Normal,
-        FontFamily::Arial,
-    );
-    let text_option_30_0_start_normal = svg_service.create_custom_text_options(
-        30.0,
-        0.0,
-        TextAnchor::Start,
-        FontWeight::Normal,
-        FontFamily::Arial,
-    );
-    let text_option_40_0_start_normal = svg_service.create_custom_text_options(
-        40.0,
-        0.0,
-        TextAnchor::Start,
-        FontWeight::Normal,
-        FontFamily::Arial,
-    );
-    let text_option_40_0_center_normal = svg_service.create_custom_text_options(
-        40.0,
-        0.0,
-        TextAnchor::Middle,
-        FontWeight::Normal,
-        FontFamily::Arial,
-    );
-    let text_option_40_0_end_normal = svg_service.create_custom_text_options(
-        40.0,
-        0.0,
-        TextAnchor::End,
-        FontWeight::Normal,
-        FontFamily::Arial,
-    );
-    let text_options_diameters_avg = svg_service.create_custom_text_options(
-        12.0,
-        -90.0,
-        TextAnchor::Middle,
-        FontWeight::Normal,
-        FontFamily::Arial,
-    );
+    let text_option_30_90_center_normal =
+        svg_service.create_custom_text_options(30.0, -90.0, TextAnchor::Middle, FontWeight::Normal, FontFamily::Arial);
+    let text_option_20_0_center_normal =
+        svg_service.create_custom_text_options(20.0, 0.0, TextAnchor::Middle, FontWeight::Normal, FontFamily::Arial);
+    let text_option_30_0_start_normal =
+        svg_service.create_custom_text_options(30.0, 0.0, TextAnchor::Start, FontWeight::Normal, FontFamily::Arial);
+    let text_option_40_0_start_normal =
+        svg_service.create_custom_text_options(40.0, 0.0, TextAnchor::Start, FontWeight::Normal, FontFamily::Arial);
+    let text_option_40_0_center_normal =
+        svg_service.create_custom_text_options(40.0, 0.0, TextAnchor::Middle, FontWeight::Normal, FontFamily::Arial);
+    let text_option_40_0_end_normal =
+        svg_service.create_custom_text_options(40.0, 0.0, TextAnchor::End, FontWeight::Normal, FontFamily::Arial);
+    let text_options_diameters_avg =
+        svg_service.create_custom_text_options(12.0, -90.0, TextAnchor::Middle, FontWeight::Normal, FontFamily::Arial);
 
     // Get language-specific thread labels
     let (external_thread, internal_thread, _avg_label, min_label, _max_label) = match params.language {
@@ -128,9 +87,9 @@ pub async fn handle(
 
     // Format pitch as TPI
     let pitch_display = format!("{} TPI", params.tpi);
-    
+
     // Calculate H (basic thread height) from TPI
-    let h = 0.866025 / params.tpi as f64; // H = 0.866025 / TPI
+    let h = 0.866025 / params.tpi; // H = 0.866025 / TPI
 
     // Helper function to convert and format values
     let convert_value = |value: f64| -> String {
@@ -145,10 +104,7 @@ pub async fn handle(
 
     // Common annotations for both male and female threads
     let mut multiple_items = vec![
-        (
-            SvgText::new(517.0, 194.0 - 5.0, "60°"),
-            text_option_40_0_center_normal,
-        ),
+        (SvgText::new(517.0, 194.0 - 5.0, "60°"), text_option_40_0_center_normal),
         (
             SvgText::new(414.5, 624.5 - 5.0, pitch_display),
             text_option_40_0_center_normal,
@@ -170,10 +126,22 @@ pub async fn handle(
     // Thread-specific annotations with actual values
     let specific_items = match params.thread_type {
         ThreadType::Male => {
-            let major_min_max = format!("ø{}-{}", convert_value(thread_data.major_diam_min_m), convert_value(thread_data.major_diam_max_m));
-            let pitch_min_max = format!("ø{}-{}", convert_value(thread_data.pitch_diameter_min_m), convert_value(thread_data.pitch_diameter_max_m));
-            let minor_min_max = format!("ø{}-{}", convert_value(thread_data.unr_minor_diameter_max_m - 0.01), convert_value(thread_data.unr_minor_diameter_max_m)); // Approximate range
-            
+            let major_min_max = format!(
+                "ø{}-{}",
+                convert_value(thread_data.major_diam_min_m),
+                convert_value(thread_data.major_diam_max_m)
+            );
+            let pitch_min_max = format!(
+                "ø{}-{}",
+                convert_value(thread_data.pitch_diameter_min_m),
+                convert_value(thread_data.pitch_diameter_max_m)
+            );
+            let minor_min_max = format!(
+                "ø{}-{}",
+                convert_value(thread_data.unr_minor_diameter_max_m - 0.01),
+                convert_value(thread_data.unr_minor_diameter_max_m)
+            ); // Approximate range
+
             vec![
                 (
                     SvgText::new(37.0 - 15.0, 555.0, major_min_max),
@@ -200,12 +168,24 @@ pub async fn handle(
                     text_option_30_0_start_normal,
                 ),
             ]
-        },
+        }
         ThreadType::Female => {
-            let _major_min_max = format!("ø{}-{}", convert_value(thread_data.major_diameter_min_f), convert_value(thread_data.major_diameter_min_f + 0.01)); // Approximate range
-            let pitch_min_max = format!("ø{}-{}", convert_value(thread_data.pitch_diameter_min_f), convert_value(thread_data.pitch_diameter_max_f));
-            let minor_min_max = format!("ø{}-{}", convert_value(thread_data.minor_diameter_min_f), convert_value(thread_data.minor_diameter_max_f));
-            
+            let _major_min_max = format!(
+                "ø{}-{}",
+                convert_value(thread_data.major_diameter_min_f),
+                convert_value(thread_data.major_diameter_min_f + 0.01)
+            ); // Approximate range
+            let pitch_min_max = format!(
+                "ø{}-{}",
+                convert_value(thread_data.pitch_diameter_min_f),
+                convert_value(thread_data.pitch_diameter_max_f)
+            );
+            let minor_min_max = format!(
+                "ø{}-{}",
+                convert_value(thread_data.minor_diameter_min_f),
+                convert_value(thread_data.minor_diameter_max_f)
+            );
+
             vec![
                 (
                     SvgText::new(917.0 - 17.0, 621.5, minor_min_max),
@@ -216,7 +196,11 @@ pub async fn handle(
                     text_option_30_90_center_normal,
                 ),
                 (
-                    SvgText::new(1035. - 5.0, 545.5, format!("{} ø{}", min_label, convert_value(thread_data.major_diameter_min_f))),
+                    SvgText::new(
+                        1035. - 5.0,
+                        545.5,
+                        format!("{} ø{}", min_label, convert_value(thread_data.major_diameter_min_f)),
+                    ),
                     text_option_30_90_center_normal,
                 ),
                 (
@@ -232,7 +216,7 @@ pub async fn handle(
                     text_option_30_0_start_normal,
                 ),
             ]
-        },
+        }
     };
     multiple_items.extend(specific_items);
 

@@ -11,7 +11,7 @@ pub enum AppError {
     InternalError { message: String },
     DatabaseConnectionError { message: String },
     MigrationError { message: String },
-    
+
     // Прикладные ошибки
     BadRequest(String),
     InvalidThreadParams(String),
@@ -60,11 +60,11 @@ impl std::error::Error for AppError {}
 impl AppError {
     pub fn error_code(&self) -> &'static str {
         match self {
-            AppError::ConfigurationError { .. } | 
-            AppError::EnvironmentError { .. } | 
-            AppError::InternalError { .. } |
-            AppError::DatabaseConnectionError { .. } |
-            AppError::MigrationError { .. } => "SYSTEM_ERROR",
+            AppError::ConfigurationError { .. }
+            | AppError::EnvironmentError { .. }
+            | AppError::InternalError { .. }
+            | AppError::DatabaseConnectionError { .. }
+            | AppError::MigrationError { .. } => "SYSTEM_ERROR",
             AppError::BadRequest(_) => "BAD_REQUEST",
             AppError::InvalidThreadParams(_) => "INVALID_THREAD_PARAMS",
             AppError::ThreadDataNotFound { .. } => "THREAD_NOT_FOUND",
@@ -78,19 +78,18 @@ impl AppError {
 
     pub fn status_code(&self) -> StatusCode {
         match self {
-            AppError::ConfigurationError { .. } | 
-            AppError::EnvironmentError { .. } | 
-            AppError::InternalError { .. } |
-            AppError::DatabaseConnectionError { .. } |
-            AppError::MigrationError { .. } |
-            AppError::DatabaseError(_) |
-            AppError::FileSystemError(_) |
-            AppError::InvalidSvgTemplate(_) => StatusCode::INTERNAL_SERVER_ERROR,
-            AppError::BadRequest(_) |
-            AppError::InvalidThreadParams(_) |
-            AppError::ValidationError(_) => StatusCode::BAD_REQUEST,
-            AppError::ThreadDataNotFound { .. } |
-            AppError::SvgTemplateNotFound(_) => StatusCode::NOT_FOUND,
+            AppError::ConfigurationError { .. }
+            | AppError::EnvironmentError { .. }
+            | AppError::InternalError { .. }
+            | AppError::DatabaseConnectionError { .. }
+            | AppError::MigrationError { .. }
+            | AppError::DatabaseError(_)
+            | AppError::FileSystemError(_)
+            | AppError::InvalidSvgTemplate(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            AppError::BadRequest(_) | AppError::InvalidThreadParams(_) | AppError::ValidationError(_) => {
+                StatusCode::BAD_REQUEST
+            }
+            AppError::ThreadDataNotFound { .. } | AppError::SvgTemplateNotFound(_) => StatusCode::NOT_FOUND,
         }
     }
 
@@ -106,13 +105,13 @@ impl AppError {
                 "diameter": diameter,
                 "pitch": pitch
             }),
-            AppError::BadRequest(msg) |
-            AppError::InvalidThreadParams(msg) |
-            AppError::SvgTemplateNotFound(msg) |
-            AppError::InvalidSvgTemplate(msg) |
-            AppError::DatabaseError(msg) |
-            AppError::FileSystemError(msg) |
-            AppError::ValidationError(msg) => json!({
+            AppError::BadRequest(msg)
+            | AppError::InvalidThreadParams(msg)
+            | AppError::SvgTemplateNotFound(msg)
+            | AppError::InvalidSvgTemplate(msg)
+            | AppError::DatabaseError(msg)
+            | AppError::FileSystemError(msg)
+            | AppError::ValidationError(msg) => json!({
                 "message": msg
             }),
             _ => json!({}),

@@ -1,10 +1,10 @@
+use crate::log_info;
 use axum::{
     extract::{Extension, Query},
     response::IntoResponse,
 };
 use serde::Deserialize;
 use sqlx::PgPool;
-use crate::log_info;
 
 use crate::shared::utils::db::{execute_query, ResponseType};
 
@@ -15,10 +15,7 @@ pub struct ToleranceParams {
     type_: Option<String>,
 }
 
-pub async fn tolerance(
-    Extension(pool): Extension<PgPool>,
-    Query(params): Query<ToleranceParams>,
-) -> impl IntoResponse {
+pub async fn tolerance(Extension(pool): Extension<PgPool>, Query(params): Query<ToleranceParams>) -> impl IntoResponse {
     log_info!("Handling tolerance request with parameters: {:?}", params);
 
     let id = params.id;

@@ -1,18 +1,12 @@
 // src/routes/v1/pipe/info/handler_pipe_info.rs
 use crate::{
     analytics::db::handle_thread_analytics,
-    shared::error::AppError,
     features::pipe::v1::{
-        common::{
-            db::ThreadDataService,
-            models::model_pipe_db::ModelPipeDB,
-        },
+        common::models::model_pipe_db::ModelPipeDB,
         info::models::{request_pipe_info::RequestPipeInfo, response_pipe_info::ResponsePipeInfo},
     },
 };
-use axum::{
-    extract::Extension, http::StatusCode, response::IntoResponse, response::Response, Json,
-};
+use axum::{extract::Extension, http::StatusCode, response::IntoResponse, response::Response, Json};
 use sqlx::query_as;
 use sqlx::PgPool;
 
@@ -42,10 +36,7 @@ FROM pipe.main
 where id = $1;
 ";
 
-pub async fn handle(
-    Extension(pool): Extension<PgPool>,
-    Query(request): Query<RequestPipeInfo>,
-) -> Response {
+pub async fn handle(Extension(pool): Extension<PgPool>, Query(request): Query<RequestPipeInfo>) -> Response {
     // Выполнение запроса к базе данных
     let db_records = query_as::<_, ModelPipeDB>(QUERY_PIPE)
         .bind(request.id)
@@ -65,16 +56,13 @@ pub async fn handle(
     };
     let response = ResponsePipeInfo::from_data(db_records, &request);
 
-
-          // Clone pool and designation for background task
-          let pool_clone = pool.clone();
-          let designation_clone = response.designation1.clone();
-            // Spawn background task for analytics
-            tokio::spawn(async move {
-                handle_thread_analytics(pool_clone, designation_clone).await;
-            });
-
+    // Clone pool and designation for background task
+    let pool_clone = pool.clone();
+    let designation_clone = response.designation1.clone();
+    // Spawn background task for analytics
+    tokio::spawn(async move {
+        handle_thread_analytics(pool_clone, designation_clone).await;
+    });
 
     (StatusCode::OK, Json(response)).into_response()
-
 }

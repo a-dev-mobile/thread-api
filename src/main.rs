@@ -1,9 +1,9 @@
 mod features;
 mod shared;
-use axum::{http::Request, routing::get, Router};
+use crate::shared::logging::{enums::LogLevel, init::init_logging, structs::LogConfig};
+use axum::Router;
 use std::{net::SocketAddr, sync::Arc};
 use tokio::net::TcpListener;
-use crate::shared::logging::{init::init_logging, structs::LogConfig, enums::LogLevel};
 
 use crate::shared::{
     database::{migrations::run_migrations, service::PostgresService},
@@ -14,7 +14,6 @@ use crate::shared::{
 mod analytics;
 
 mod test;
-use tower_http::cors::{Any, CorsLayer};
 
 pub mod services;
 
@@ -51,8 +50,7 @@ async fn init_app() -> AppSettings {
     // Setup logging with configured level
     let log_level = LogLevel::from(app_settings.config.logging.level.as_str());
     let log_config = LogConfig { level: log_level };
-    init_logging(log_config)
-        .expect("Failed to initialize logger");
+    init_logging(log_config).expect("Failed to initialize logger");
 
     log_info!("Инициализация приложения с конфигурацией: {:?}", app_settings.config);
 
@@ -94,10 +92,7 @@ fn create_application_router(app_state: Arc<AppState>) -> Router {
             "/v1/metric/tolerance",
             get(crate::features::metric::v1::tolerance::tolerance),
         )
-        .route(
-            "/v1/metric/info",
-            get(crate::features::metric::v1::info::handler::info),
-        )
+        .route("/v1/metric/info", get(crate::features::metric::v1::info::handler::info))
         .route("/v1/metric/svg", get(crate::features::metric::v1::svg::handler::svg))
         // === V1 IMPERIAL ROUTES ===
         .route(
@@ -146,10 +141,7 @@ fn create_application_router(app_state: Arc<AppState>) -> Router {
             "/v1/pipe/diameters",
             get(crate::features::pipe::v1::diameters::handler::handle),
         )
-        .route(
-            "/v1/pipe/info",
-            get(crate::features::pipe::v1::info::handler::handle),
-        )
+        .route("/v1/pipe/info", get(crate::features::pipe::v1::info::handler::handle))
         // === V2 IMPERIAL ROUTES ===
         .route(
             "/v2/imperial/info",

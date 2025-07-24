@@ -7,7 +7,7 @@ use std::path::PathBuf;
 use tokio::fs;
 
 use crate::{
-   shared::enums::{Theme, ThreadStandard, ThreadType},
+    shared::enums::{Theme, ThreadStandard, ThreadType},
     shared::error::AppError,
 };
 
@@ -42,10 +42,7 @@ impl SvgService {
         enum_theme: Theme,
         enum_thread: ThreadStandard,
     ) -> String {
-        format!(
-            "{}-thread-{}-{}.svg",
-            enum_thread, enum_type_thread, enum_theme
-        )
+        format!("{}-thread-{}-{}.svg", enum_thread, enum_type_thread, enum_theme)
     }
 
     /// Reads SVG file from filesystem
@@ -58,12 +55,7 @@ impl SvgService {
     }
 
     /// Generates SVG text element with specified parameters
-    pub fn generate_svg_text(
-        &self,
-        item: &SvgText,
-        theme: &Theme,
-        options: &SvgTextOptions,
-    ) -> String {
+    pub fn generate_svg_text(&self, item: &SvgText, theme: &Theme, options: &SvgTextOptions) -> String {
         let fill_color = match theme {
             Theme::Light => "black",
             Theme::Dark => "white",
@@ -132,10 +124,7 @@ impl SvgService {
     /// Creates HTTP response with SVG content
     pub fn create_svg_response(&self, content: String) -> Response<Body> {
         let mut headers = HeaderMap::new();
-        headers.insert(
-            CONTENT_TYPE,
-            HeaderValue::from_static("image/svg+xml; charset=utf-8"),
-        );
+        headers.insert(CONTENT_TYPE, HeaderValue::from_static("image/svg+xml; charset=utf-8"));
 
         (StatusCode::OK, headers, content.into_bytes()).into_response()
     }

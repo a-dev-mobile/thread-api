@@ -1,9 +1,9 @@
+use crate::{log_error, log_info};
 use sqlx::{
     migrate::{MigrateError, Migrator},
     Executor, PgPool,
 };
 use std::path::Path;
-use crate::{log_error, log_info};
 
 pub async fn run_migrations(pool: &PgPool) -> Result<(), MigrateError> {
     log_info!("Running database migrations...");
@@ -25,12 +25,11 @@ pub async fn run_migrations(pool: &PgPool) -> Result<(), MigrateError> {
                     log_info!("✅ Database migrations completed successfully");
 
                     // Проверяем результат
-                    let applied_migrations: Vec<(i64, String)> = sqlx::query_as(
-                        "SELECT version, description FROM _sqlx_migrations ORDER BY version",
-                    )
-                    .fetch_all(pool)
-                    .await
-                    .map_err(MigrateError::Execute)?;
+                    let applied_migrations: Vec<(i64, String)> =
+                        sqlx::query_as("SELECT version, description FROM _sqlx_migrations ORDER BY version")
+                            .fetch_all(pool)
+                            .await
+                            .map_err(MigrateError::Execute)?;
 
                     log_info!("Applied migrations:");
                     for (version, description) in applied_migrations {
@@ -46,10 +45,7 @@ pub async fn run_migrations(pool: &PgPool) -> Result<(), MigrateError> {
             }
         }
         Err(e) => {
-            log_error!(
-                "Failed to create migrator from path {:?}: {}",
-                migrations_path, e
-            );
+            log_error!("Failed to create migrator from path {:?}: {}", migrations_path, e);
             Err(e)
         }
     }
@@ -66,14 +62,12 @@ pub async fn check_pending_migrations(pool: &PgPool) -> Result<(), MigrateError>
     let all_migrations = migrator.iter().collect::<Vec<_>>();
 
     // Получаем примененные миграции
-    let applied: Vec<(i64,)> =
-        sqlx::query_as("SELECT version FROM _sqlx_migrations ORDER BY version")
-            .fetch_all(pool)
-            .await
-            .map_err(MigrateError::Execute)?;
+    let applied: Vec<(i64,)> = sqlx::query_as("SELECT version FROM _sqlx_migrations ORDER BY version")
+        .fetch_all(pool)
+        .await
+        .map_err(MigrateError::Execute)?;
 
-    let applied_versions: std::collections::HashSet<i64> =
-        applied.into_iter().map(|(v,)| v).collect();
+    let applied_versions: std::collections::HashSet<i64> = applied.into_iter().map(|(v,)| v).collect();
 
     let pending: Vec<_> = all_migrations
         .iter()

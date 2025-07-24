@@ -4,13 +4,12 @@ use axum::{
 };
 use std::sync::Arc;
 
-use super::{service::HealthService, entity::HealthStatus};
+use super::{entity::HealthStatus, service::HealthService};
 
 /// Трейт обработчика health проверок
 #[async_trait::async_trait]
 pub trait HealthHandler: Send + Sync {
     async fn get_health(&self) -> Response;
-
 }
 
 /// Реализация обработчика health v1
@@ -39,9 +38,7 @@ impl HealthHandler for HealthHandlerV1 {
     async fn get_health(&self) -> Response {
         let health = self.service.get_health().await;
         let status_code = Self::status_to_http_code(&health.status);
-        
+
         (status_code, JsonResponse(health)).into_response()
     }
-
-   
 }

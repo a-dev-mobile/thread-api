@@ -1,4 +1,4 @@
-use crate::{features::metric::models::ThreadInfo, shared::utils::svg::generate_svg_text,};
+use crate::{features::metric::models::ThreadInfo, shared::utils::svg::generate_svg_text};
 
 use super::coords::SvgTextCoordinates;
 
@@ -10,11 +10,7 @@ pub fn generate_svg_texts(
     language: &str,
     show_dimensions: bool,
 ) -> String {
-    let major_diam_label = if type_.eq_ignore_ascii_case("female") {
-        "D"
-    } else {
-        "d"
-    };
+    let major_diam_label = if type_.eq_ignore_ascii_case("female") { "D" } else { "d" };
 
     let pitch_diam_label = if type_.eq_ignore_ascii_case("female") {
         "D2"
@@ -48,10 +44,7 @@ pub fn generate_svg_texts(
         coords.major_diam_x,
         coords.major_diam_y,
         &if show_dimensions {
-            format!(
-                "ø{}-{}",
-                thread_info.major_diam_min, thread_info.major_diam_max
-            )
+            format!("ø{}-{}", thread_info.major_diam_min, thread_info.major_diam_max)
         } else {
             major_diam_label.to_string()
         },
@@ -79,10 +72,7 @@ pub fn generate_svg_texts(
         coords.pitch_diam_x,
         coords.pitch_diam_y,
         &if show_dimensions {
-            format!(
-                "ø{}-{}",
-                thread_info.pitch_diam_min, thread_info.pitch_diam_max
-            )
+            format!("ø{}-{}", thread_info.pitch_diam_min, thread_info.pitch_diam_max)
         } else {
             pitch_diam_label.to_string()
         },
@@ -110,10 +100,7 @@ pub fn generate_svg_texts(
         coords.minor_diam_x,
         coords.minor_diam_y,
         &if show_dimensions {
-            format!(
-                "ø{}-{}",
-                thread_info.minor_diam_min, thread_info.minor_diam_max
-            )
+            format!("ø{}-{}", thread_info.minor_diam_min, thread_info.minor_diam_max)
         } else {
             minor_diam_label.to_string()
         },
@@ -151,15 +138,7 @@ pub fn generate_svg_texts(
         None,
     );
 
-    let svg_text_deg = generate_svg_text(
-        coords.angle_x,
-        coords.angle_y,
-        "60°",
-        theme,
-        20.0,
-        0.0,
-        None,
-    );
+    let svg_text_deg = generate_svg_text(coords.angle_x, coords.angle_y, "60°", theme, 20.0, 0.0, None);
 
     let svg_text_thread_depth = generate_svg_text(
         coords.thread_depth_x,
@@ -372,11 +351,7 @@ pub fn generate_svg_texts(
             generate_svg_text(
                 coords.d3_x_avg,
                 coords.d3_y_avg,
-                &format!(
-                    "({} ø{:?})",
-                    avg_label,
-                    thread_info.minor_diam_avg_d3.unwrap()
-                ),
+                &format!("({} ø{:?})", avg_label, thread_info.minor_diam_avg_d3.unwrap()),
                 theme,
                 10.0,
                 -90.0,

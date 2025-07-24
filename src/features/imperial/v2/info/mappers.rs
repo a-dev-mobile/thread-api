@@ -1,7 +1,7 @@
 use crate::{
-   shared::enums::{Language, ThreadType, Unit},
-    features::imperial::v2::info::models::response::ResponseV2ImperialInfo, shared::utils::number::NumberFormatter,
-
+    features::imperial::v2::info::models::response::ResponseV2ImperialInfo,
+    shared::enums::{Language, ThreadType, Unit},
+    shared::utils::number::NumberFormatter,
 };
 
 use super::models::{
@@ -13,10 +13,7 @@ use super::models::{
 pub struct ImperialInfoMapper;
 
 impl ImperialInfoMapper {
-    pub fn from_data(
-        db: ModelV2ImperialDB,
-        request: &RequestV2ImperialInfo,
-    ) -> ResponseV2ImperialInfo {
+    pub fn from_data(db: ModelV2ImperialDB, request: &RequestV2ImperialInfo) -> ResponseV2ImperialInfo {
         let is_male = matches!(request.type_, ThreadType::Male);
 
         ResponseV2ImperialInfo {
@@ -36,10 +33,7 @@ impl ImperialInfoMapper {
             ThreadType::Female => &db.class_f,
         };
 
-        format!(
-            "{} - {} {} - {}",
-            db.diameter, db.tpi, db.series_designation, class
-        )
+        format!("{} - {} {} - {}", db.diameter, db.tpi, db.series_designation, class)
     }
 
     fn generate_designation2(db: &ModelV2ImperialDB, thread_type: &ThreadType) -> String {
@@ -48,10 +42,7 @@ impl ImperialInfoMapper {
             ThreadType::Female => &db.class_f,
         };
 
-        format!(
-            "({} - {} {} - {})",
-            db.diameter_2, db.tpi, db.series_designation, class
-        )
+        format!("({} - {} {} - {})", db.diameter_2, db.tpi, db.series_designation, class)
     }
 
     fn format_description(is_male: bool, language: &Language) -> String {
@@ -106,13 +97,7 @@ impl ImperialInfoMapper {
     ) -> Vec<ModelImperialAdditionalInfo> {
         let mut main_info = Vec::new();
         let formatter = |value: f64| {
-            NumberFormatter::convert_and_round_to_string(
-                value,
-                &Unit::Inch,
-                &request.units,
-                request.precision,
-                false,
-            )
+            NumberFormatter::convert_and_round_to_string(value, &Unit::Inch, &request.units, request.precision, false)
         };
         let name = Self::get_localized_name(&request.language);
 
@@ -198,21 +183,12 @@ impl ImperialInfoMapper {
         main_info
     }
 
-    fn map_diameter_info(
-        db: &ModelV2ImperialDB,
-        request: &RequestV2ImperialInfo,
-    ) -> Vec<ModelImperialDiameterInfo> {
+    fn map_diameter_info(db: &ModelV2ImperialDB, request: &RequestV2ImperialInfo) -> Vec<ModelImperialDiameterInfo> {
         let mut result = Vec::new();
         let is_male = matches!(request.type_, ThreadType::Male);
         let name = Self::get_localized_name(&request.language);
         let formatter = |value: f64, diff: bool| {
-            NumberFormatter::convert_and_round_to_string(
-                value,
-                &Unit::Inch,
-                &request.units,
-                request.precision,
-                diff,
-            )
+            NumberFormatter::convert_and_round_to_string(value, &Unit::Inch, &request.units, request.precision, diff)
         };
 
         // Calculate basic thread dimensions
@@ -329,13 +305,7 @@ impl ImperialInfoMapper {
         let is_male = matches!(request.type_, ThreadType::Male);
         let name = Self::get_localized_name(&request.language);
         let formatter = |value: f64| {
-            NumberFormatter::convert_and_round_to_string(
-                value,
-                &Unit::Inch,
-                &request.units,
-                request.precision,
-                false,
-            )
+            NumberFormatter::convert_and_round_to_string(value, &Unit::Inch, &request.units, request.precision, false)
         };
 
         // Thread pitch and basic calculations
@@ -377,10 +347,7 @@ impl ImperialInfoMapper {
         if !is_male {
             let h_5_16 = (5.0 / 16.0) * h;
             result.push(ModelImperialAdditionalInfo {
-                name: name(
-                    "Basic truncation at root (5H/16)",
-                    "Базовый срез у впадины (5H/16)",
-                ),
+                name: name("Basic truncation at root (5H/16)", "Базовый срез у впадины (5H/16)"),
                 value: formatter(h_5_16),
                 description: None,
             });
@@ -397,10 +364,7 @@ impl ImperialInfoMapper {
         if is_male {
             let h_9_16 = (9.0 / 16.0) * h;
             result.push(ModelImperialAdditionalInfo {
-                name: name(
-                    "Max material at root (9H/16)",
-                    "Макс. материал у впадины (9H/16)",
-                ),
+                name: name("Max material at root (9H/16)", "Макс. материал у впадины (9H/16)"),
                 value: formatter(h_9_16),
                 description: None,
             });
@@ -412,19 +376,13 @@ impl ImperialInfoMapper {
         let long_length = 10.0 * pitch;
 
         result.push(ModelImperialAdditionalInfo {
-            name: name(
-                "Length of Engagement (short)",
-                "Длина свинчивания (короткая)",
-            ),
+            name: name("Length of Engagement (short)", "Длина свинчивания (короткая)"),
             value: formatter(short_length),
             description: None,
         });
 
         result.push(ModelImperialAdditionalInfo {
-            name: name(
-                "Length of Engagement (normal)",
-                "Длина свинчивания (нормальная)",
-            ),
+            name: name("Length of Engagement (normal)", "Длина свинчивания (нормальная)"),
             value: formatter(normal_length),
             description: None,
         });
@@ -458,7 +416,7 @@ impl ImperialInfoMapper {
         // Показываем информацию о сверле только если единицы измерения - миллиметры
         // Отключаем показ для дюймов и микрон
         match request.units {
-            Unit::Mm => {}, // Продолжаем выполнение для миллиметров
+            Unit::Mm => {}                            // Продолжаем выполнение для миллиметров
             Unit::Inch | Unit::Micron => return None, // Не показываем для дюймов и микрон
         }
 
