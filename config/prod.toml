@@ -1,11 +1,10 @@
+[logging]
+level = "info"             # Для prod лучше info/warn, debug слишком детализированный
+format = "json"            # JSON формат лучше для централизованного логирования
 
-log_level = "info,sqlx=info"
-log_format = "json"
-app_env = "prod"
-
-[server]
-address = "0.0.0.0"
-port = 5000
-
-[database]
-url = ""
+[postgres]
+timeout = 30               # Оставляем 30 секунд - хорошее значение
+max_connections = 100      # Увеличиваем пул соединений для нагрузки
+min_connections = 10       # Больше минимальных соединений для быстрого отклика
+max_lifetime = 3600        # 1 час - увеличиваем время жизни соединения
+idle_timeout = 300         # 5 минут - сокращаем время простоя для освобождения ресурсов
